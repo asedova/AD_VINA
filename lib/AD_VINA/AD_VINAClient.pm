@@ -12,6 +12,7 @@ eval {
     $get_time = sub { Time::HiRes::gettimeofday() };
 };
 
+use Bio::KBase::AuthToken;
 
 # Client version should match Impl version
 # This is a Semantic Version number,
@@ -74,6 +75,27 @@ sub new
 	push(@{$self->{headers}}, 'Kbrpc-Errordest', $self->{kbrpc_error_dest});
     }
 
+    #
+    # This module requires authentication.
+    #
+    # We create an auth token, passing through the arguments that we were (hopefully) given.
+
+    {
+	my %arg_hash2 = @args;
+	if (exists $arg_hash2{"token"}) {
+	    $self->{token} = $arg_hash2{"token"};
+	} elsif (exists $arg_hash2{"user_id"}) {
+	    my $token = Bio::KBase::AuthToken->new(@args);
+	    if (!$token->error_message) {
+	        $self->{token} = $token->token;
+	    }
+	}
+	
+	if (exists $self->{token})
+	{
+	    $self->{client}->{token} = $self->{token};
+	}
+    }
 
     my $ua = $self->{client}->ua;	 
     my $timeout = $ENV{CDMI_TIMEOUT} || (30 * 60);	 
@@ -84,6 +106,102 @@ sub new
 }
 
 
+
+
+=head2 ad_vina
+
+  $output = $obj->ad_vina($inparams)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$inparams is an AD_VINA.InParams
+$output is an AD_VINA.OutParams
+InParams is a reference to a hash where the following keys are defined:
+	receptor has a value which is a string
+	ligand has a value which is a string
+	center has a value which is a string
+	size has a value which is a string
+OutParams is a reference to a hash where the following keys are defined:
+	outname has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$inparams is an AD_VINA.InParams
+$output is an AD_VINA.OutParams
+InParams is a reference to a hash where the following keys are defined:
+	receptor has a value which is a string
+	ligand has a value which is a string
+	center has a value which is a string
+	size has a value which is a string
+OutParams is a reference to a hash where the following keys are defined:
+	outname has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub ad_vina
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function ad_vina (received $n, expecting 1)");
+    }
+    {
+	my($inparams) = @args;
+
+	my @_bad_arguments;
+        (ref($inparams) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"inparams\" (value was \"$inparams\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to ad_vina:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'ad_vina');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "AD_VINA.ad_vina",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'ad_vina',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method ad_vina",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'ad_vina',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -119,7 +237,7 @@ sub status
 sub version {
     my ($self) = @_;
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-        method => "${last_module.module_name}.version",
+        method => "AD_VINA.version",
         params => [],
     });
     if ($result) {
@@ -127,16 +245,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => '${last_method.name}',
+                method_name => 'ad_vina',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method ${last_method.name}",
+            error => "Error invoking method ad_vina",
             status_line => $self->{client}->status_line,
-            method_name => '${last_method.name}',
+            method_name => 'ad_vina',
         );
     }
 }
@@ -170,6 +288,72 @@ sub _validate_version {
 }
 
 =head1 TYPES
+
+
+
+=head2 InParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+receptor has a value which is a string
+ligand has a value which is a string
+center has a value which is a string
+size has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+receptor has a value which is a string
+ligand has a value which is a string
+center has a value which is a string
+size has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 OutParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+outname has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+outname has a value which is a string
+
+
+=end text
+
+=back
 
 
 

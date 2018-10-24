@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
-import os
 #END_HEADER
 
 
@@ -34,32 +33,25 @@ class AD_VINA:
         pass
 
 
-    def ad_vina(self, ctx, inparams):
+    def ad_vina(self, ctx, params):
         """
-        :param inparams: instance of type "InParams" -> structure: parameter
+        :param params: instance of type "InParams" -> structure: parameter
            "receptor" of String, parameter "ligand" of String, parameter
-           "center" of String, parameter "size" of String
+           "center" of list of Double, parameter "size" of list of Double
         :returns: instance of type "OutParams" -> structure: parameter
            "outname" of String
         """
         # ctx is the context object
-        # return variables are: output
+        # return variables are: returnVal
         #BEGIN ad_vina
-        (cx, cy, cz)=map(lambda x: float(x), inparams["center"].split(','))
-        (sx, sy, sz)=map(lambda x: float(x), inparams["size"].split(','))
-        com="/autodock_vina_1_1_2_linux_x86/bin/vina --receptor %s --ligand %s --cpu 4 --center_x %f --center_y %f  --center_z %f --size_x %f --size_y %f --size_z %f --out %s" % (inparams["receptor"], inparams["ligand"], cx, cy, cz, sx, sy, sz, inparams["outname"])
-        print(com+"\n")
-        os.system(com)
-        output = {}
-#        print(com)
         #END ad_vina
 
         # At some point might do deeper type checking...
-        if not isinstance(output, dict):
+        if not isinstance(returnVal, dict):
             raise ValueError('Method ad_vina return value ' +
-                             'output is not type dict as required.')
+                             'returnVal is not type dict as required.')
         # return the results
-        return [output]
+        return [returnVal]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

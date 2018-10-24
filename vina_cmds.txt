@@ -1,0 +1,1 @@
+./vina --receptor lck_small.pdbqt --ligand  lck-active-26.pdbqt --cpu 8 --center_x 18.273 --center_y 44.681  --center_z 80.351 --size_x 50 --size_y 50 --size_z 50 --out out.pdbqt

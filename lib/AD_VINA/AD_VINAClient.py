@@ -33,6 +33,18 @@ class AD_VINA(object):
             trust_all_ssl_certificates=trust_all_ssl_certificates,
             auth_svc=auth_svc)
 
+    def ad_vina(self, inparams, context=None):
+        """
+        :param inparams: instance of type "InParams" -> structure: parameter
+           "receptor" of String, parameter "ligand" of String, parameter
+           "center" of String, parameter "size" of String
+        :returns: instance of type "OutParams" -> structure: parameter
+           "outname" of String
+        """
+        return self._client.call_method(
+            'AD_VINA.ad_vina',
+            [inparams], self._service_ver, context)
+
     def status(self, context=None):
         return self._client.call_method('AD_VINA.status',
                                         [], self._service_ver, context)

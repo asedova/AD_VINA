@@ -76,14 +76,23 @@ class AD_VINATest(unittest.TestCase):
         return self.__class__.ctx
 
     # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_your_method(self):
+    def test_AD_VINA(self):
         # Prepare test objects in workspace if needed using
         # self.getWsClient().save_objects({'workspace': self.getWsName(),
         #                                  'objects': []})
         #
         # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
+        inparams = {
+            "receptor" : "lck_small.pdbqt",
+            "ligand" : "lck-active-26.pdbqt",
+            "center" :  "18.273, 44.681, 80.351",
+            "size" : "50, 50, 50",
+            "outname" : "out.pdbqt"
+        }
+        ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
         #
         # Check returned data with
         # self.assertEqual(ret[...], ...) or other unittest methods
         pass
+
+

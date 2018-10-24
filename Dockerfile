@@ -8,7 +8,8 @@ MAINTAINER KBase Developer
 
 # RUN apt-get update
 
-
+RUN cd / && wget http://vina.scripps.edu/download/autodock_vina_1_1_2_linux_x86.tgz && tar -xzf autodock_vina_1_1_2_linux_x86.tgz 
+  
 # -----------------------------------------
 
 COPY ./ /kb/module

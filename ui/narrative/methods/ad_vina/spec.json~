@@ -1,0 +1,113 @@
+{
+    "ver": "0.0.1",
+    "authors": [
+        "asedova"
+    ],
+    "contact": "",
+    "categories": ["active"],
+    "widgets": {
+        "input": null,
+        "output": null
+    },
+    "parameters": [ 
+           {
+            "id": "receptor",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+            }
+	   },
+	   {
+            "id": "ligand",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+	    }
+	   },
+       	{
+            "id": "center",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+            }
+       	},
+       	{
+            "id": "size",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+            }
+       	},
+       	{
+            "id": "outname",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+            }
+       	}
+    ],
+    "behavior": {
+        "service-mapping": {
+            "url": "",
+            "name": "AD_VINA",
+            "method": "ad_vina",
+            "input_mapping": [
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_argument_position": 0
+                },
+                {
+                    "input_parameter": "receptor",
+                    "target_argument_position": 1
+                },
+                {
+                    "input_parameter": "ligand",
+                    "target_argument_position": 2
+                },
+                {
+                    "input_parameter": "center",
+                    "target_argument_position": 3
+                },
+                {
+                    "input_parameter": "size",
+                    "target_argument_position": 4
+                }
+            ],
+            "output_mapping": [
+                {
+                    "service_method_output_path": [0],
+                    "target_property": "output"
+                },
+                {
+                    "input_parameter": "outname",
+                    "target_property": "input"
+                },
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspaceName"
+                }
+            ]
+        }
+    },
+    "job_id_output_field": "docker"
+}

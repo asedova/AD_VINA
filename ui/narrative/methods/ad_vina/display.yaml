@@ -4,7 +4,7 @@
 name: Autodock Vina Protein-Ligand Docking
 
 tooltip: |
-    Perform some kind of method
+    First test of protein-ligand docking tool
 
 screenshots: []
 
@@ -35,36 +35,39 @@ parameters :
         short-hint : |
             pdbqt format
         long-hint  : |
-            The first parameter that needs to be entered to drive the method. This might be the first of many.
+            name of receptor input file
     ligand :
         ui-name : |
             Ligand File
         short-hint : |
             pdbqt format
         long-hint  : |
-            The first parameter that needs to be entered to drive the method. This might be the first of many.
+            name of ligand input file
+
     center :
         ui-name : |
             Center
         short-hint : |
             three coordinates: x, y, z
         long-hint  : |
-            The first parameter that needs to be entered to drive the method. This might be the first of many.
+            
+
     size :
         ui-name : |
             Size
         short-hint : |
             three coordinates: x, y, z
         long-hint  : |
-            The first parameter that needs to be entered to drive the method. This might be the first of many.
+
     outname :
         ui-name : |
             Output File Name
         short-hint : |
-            Name of output file 
+          pdbqt format  
         long-hint  : |
-            The first parameter that needs to be entered to drive the method. This might be the first of many.
+            Name of output file 
 
 
 description : |
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pulvinar efficitur felis, quis tincidunt sem congue at. Vivamus ornare feugiat faucibus. Fusce tincidunt mattis nunc, nec varius purus convallis quis. Nulla facilisi. In at magna dolor. Suspendisse sit amet felis at arcu auctor dapibus vitae pharetra dui. Nam semper mi quis tortor fermentum mollis. Donec a arcu pharetra, rutrum dolor vitae, rutrum mauris. Donec ornare fringilla sagittis. Nam laoreet est in elementum malesuada. Vestibulum id mi eget urna hendrerit feugiat. Donec et ultrices nulla. Phasellus diam eros, dapibus at tempus nec, semper vel ante.</p>
+<p> First test of autodock vina app
+</p>

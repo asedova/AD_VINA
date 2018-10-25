@@ -69,5 +69,4 @@ parameters :
 
 
 description : |
-<p> First test of autodock vina app
-</p>
+    <p>First test of Autodock Vina protein-ligand docking tool.</p>

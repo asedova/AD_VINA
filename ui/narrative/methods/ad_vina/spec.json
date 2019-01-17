@@ -3,68 +3,171 @@
     "authors": [
         "asedova"
     ],
-    "contact": "",
-    "categories": ["active"],
+    "contact": "help@kbase.us",
+    "categories": ["active","structural_genomics"],
     "widgets": {
         "input": null,
-        "output": null
+        "output": "no-display"
     },
     "parameters": [ 
-           {
-            "id": "receptor",
+        {
+            "id": "pdb_refs",
             "optional": false,
             "advanced": false,
-            "allow_multiple": false,
+            "allow_multiple": true,
             "default_values": [ "" ],
             "field_type": "text",
-            "text_options": {
-                "valid_ws_types": [ ]
+            "text_options" : {
+               "valid_ws_types" : [
+                  "KBaseStructure.ModelProteinStructure",
+                  "KBaseStructure.ExperimentalProteinStructure"
+               ]
             }
-	   },
-	   {
-            "id": "ligand",
+        },
+        {
+            "id": "ligand_list_ref",
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
             "default_values": [ "" ],
             "field_type": "text",
-            "text_options": {
-                "valid_ws_types": [ ]
-	    }
-	   },
-       	{
-            "id": "center",
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "default_values": [ "" ],
-            "field_type": "text",
-            "text_options": {
-                "valid_ws_types": [ ]
+            "text_options" : {
+               "valid_ws_types" : [
+                  "KBaseBiochem.CompoundSet"
+               ]
             }
-       	},
-       	{
-            "id": "size",
+        },
+        {
+            "id": "center_x",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : -1000,
+               "max_int" : 1000
+            }
+        },
+        {
+            "id": "center_y",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : -1000,
+               "max_int" : 1000
+            }
+        },
+        {
+            "id": "center_z",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : -1000,
+               "max_int" : 1000
+            }
+        },
+        {
+            "id": "size_x",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : 0,
+               "max_int" : 10000
+            }
+        },
+        {
+            "id": "size_y",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : 0,
+               "max_int" : 10000
+            }
+        },
+        {
+            "id": "size_z",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "float",
+               "min_int" : 0,
+               "max_int" : 10000
+            }
+        },
+        {
+            "id": "num_modes",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "1000" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : 0,
+               "max_int" : 10000
+            }
+        },
+        {
+            "id": "energy_range",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "10" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : 0,
+               "max_int" : 10000
+            }
+        },
+        {
+            "id": "exhaustiveness",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "20" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : 0,
+               "max_int" : 200
+            }
+        },
+        {
+            "id": "dockingscore_name",
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
             "default_values": [ "" ],
             "field_type": "text",
             "text_options": {
-                "valid_ws_types": [ ]
+                "is_output_name" : true,
+                "valid_ws_types": [
+                    "KBaseMatrices.DockingScoreMatrix"
+                ]
             }
-       	},
-       	{
-            "id": "outname",
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "default_values": [ "" ],
-            "field_type": "text",
-            "text_options": {
-                "valid_ws_types": [ ]
-            }
-       	}
+        }
     ],
     "behavior": {
         "service-mapping": {
@@ -74,27 +177,57 @@
             "input_mapping": [
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "workspace"
+                    "target_property": "workspace_name"
                 },
                 {
-                    "input_parameter": "receptor",
-                    "target_property": "receptor"
+                    "input_parameter": "pdb_refs",
+                    "target_property": "pdb_refs",
+                    "target_type_transform": "resolved-ref"
                 },
                 {
-                    "input_parameter": "ligand",
-                    "target_property": "ligand"
+                    "input_parameter": "ligand_list_ref",
+                    "target_property": "ligand_list_ref",
+                    "target_type_transform": "resolved-ref"
                 },
                 {
-                    "input_parameter": "center",
-                    "target_property": "center"
+                    "input_parameter": "center_x",
+                    "target_property": "center_x"
                 },
                 {
-                    "input_parameter": "size",
-                    "target_property": "size"
+                    "input_parameter": "center_y",
+                    "target_property": "center_y"
                 },
                 {
-                    "input_parameter": "outname",
-                    "target_property": "outname"
+                    "input_parameter": "center_z",
+                    "target_property": "center_Z"
+                },
+                {
+                    "input_parameter": "size_x",
+                    "target_property": "size_x"
+                },
+                {
+                    "input_parameter": "size_y",
+                    "target_property": "size_y"
+                },
+                {
+                    "input_parameter": "size_z",
+                    "target_property": "size_z"
+                },
+                {
+                    "input_parameter": "num_modes",
+                    "target_property": "num_modes"
+                },
+                {
+                    "input_parameter": "energy_range",
+                    "target_property": "energy_range"
+                },
+                {
+                    "input_parameter": "exhaustiveness",
+                    "target_property": "exhaustiveness"
+                },
+                {
+                    "input_parameter": "dockingscore_name",
+                    "target_property": "dockingscore_name"
                 }
             ],
             "output_mapping": [

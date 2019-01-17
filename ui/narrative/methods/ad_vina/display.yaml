@@ -5,7 +5,6 @@ name: Autodock Vina Protein-Ligand Docking
 
 tooltip: |
     First test of protein-ligand docking tool
-
 screenshots: []
 
 icon: icon.png
@@ -16,57 +15,108 @@ icon: icon.png
 suggestions:
     apps:
         related:
-            [app1, app2]
+            []
         next:
-            [app3, app4]
+            []
     methods:
         related:
-            [method1, method2]
+            []
         next:
-            [method3, method4]
+            []
 
 #
 # Configure the display and description of parameters
 #
 parameters :
-    receptor :
+    pdb_refs :
         ui-name : |
-            Receptor File
+            Protein structures
         short-hint : |
-            pdbqt format
+            List of protein structures to dock with specified ligands
         long-hint  : |
-            name of receptor input file
-    ligand :
+            List of protein structures to dock with specified ligands
+    ligand_list_ref :
         ui-name : |
-            Ligand File
+            Ligands to dock
         short-hint : |
-            pdbqt format
+            Set of compounds to dock with specified protien structures
         long-hint  : |
-            name of ligand input file
-
-    center :
+            Set of compounds to dock with specified protien structures
+    center_x :
         ui-name : |
-            Center
+            Center x coordinate
         short-hint : |
-            three coordinates: x, y, z
+            X-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
         long-hint  : |
-            
-
-    size :
+            X-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
+    center_y :
         ui-name : |
-            Size
+            Center y coordinate
         short-hint : |
-            three coordinates: x, y, z
+            Y-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
         long-hint  : |
-
-    outname :
+            Y-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
+    center_z :
         ui-name : |
-            Output File Name
+            Center z coordinate
         short-hint : |
-          pdbqt format  
+            Z-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
         long-hint  : |
-            Name of output file 
-
-
+            Z-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
+    size_x :
+        ui-name : |
+            Size x coordinate
+        short-hint : |
+            X-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+        long-hint  : |
+            X-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+    size_y :
+        ui-name : |
+            Size y coordinate
+        short-hint : |
+            Y-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+        long-hint  : |
+            Y-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+    size_z :
+        ui-name : |
+            Size z coordinate
+        short-hint : |
+            Z-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+        long-hint  : |
+            Z-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
+    num_modes :
+        ui-name : |
+            Number of modes
+        short-hint : |
+            Number of modes to try
+        long-hint  : |
+            Number of modes to try
+    energy_range :
+        ui-name : |
+            Energy range
+        short-hint : |
+            Range of energies to try
+        long-hint  : |
+            Range of energies to try
+    exhaustiveness :
+        ui-name : |
+            Exhaustiveness
+        short-hint : |
+            Exhaustiveness of analysis
+        long-hint  : |
+            Exhaustiveness of analysis
+    dockingscore_name :
+        ui-name : |
+            Output score matrix
+        short-hint : |
+            Supply a name to use for the output score matrix
+        long-hint  : |
+            Supply a name to use for the output score matrix
 description : |
     <p>First test of Autodock Vina protein-ligand docking tool.</p>
+
+publications :
+    -
+        display-text: |
+            [1] TBD
+        link: https://www.kbase.us

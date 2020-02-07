@@ -110,7 +110,7 @@ sub new
 
 =head2 ad_vina
 
-  $output = $obj->ad_vina($inparams)
+  $output = $obj->ad_vina($params)
 
 =over 4
 
@@ -119,15 +119,11 @@ sub new
 =begin html
 
 <pre>
-$inparams is an AD_VINA.InParams
-$output is an AD_VINA.OutParams
-InParams is a reference to a hash where the following keys are defined:
-	receptor has a value which is a string
-	ligand has a value which is a string
-	center has a value which is a string
-	size has a value which is a string
-OutParams is a reference to a hash where the following keys are defined:
-	outname has a value which is a string
+$params is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+$output is an AD_VINA.ReportResults
+ReportResults is a reference to a hash where the following keys are defined:
+	report_name has a value which is a string
+	report_ref has a value which is a string
 
 </pre>
 
@@ -135,22 +131,18 @@ OutParams is a reference to a hash where the following keys are defined:
 
 =begin text
 
-$inparams is an AD_VINA.InParams
-$output is an AD_VINA.OutParams
-InParams is a reference to a hash where the following keys are defined:
-	receptor has a value which is a string
-	ligand has a value which is a string
-	center has a value which is a string
-	size has a value which is a string
-OutParams is a reference to a hash where the following keys are defined:
-	outname has a value which is a string
+$params is a reference to a hash where the key is a string and the value is an UnspecifiedObject, which can hold any non-null object
+$output is an AD_VINA.ReportResults
+ReportResults is a reference to a hash where the following keys are defined:
+	report_name has a value which is a string
+	report_ref has a value which is a string
 
 
 =end text
 
 =item Description
 
-
+This example function accepts any number of parameters and returns results in a KBaseReport
 
 =back
 
@@ -168,10 +160,10 @@ OutParams is a reference to a hash where the following keys are defined:
 							       "Invalid argument count for function ad_vina (received $n, expecting 1)");
     }
     {
-	my($inparams) = @args;
+	my($params) = @args;
 
 	my @_bad_arguments;
-        (ref($inparams) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"inparams\" (value was \"$inparams\")");
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
 	    my $msg = "Invalid arguments passed to ad_vina:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
@@ -291,7 +283,7 @@ sub _validate_version {
 
 
 
-=head2 InParams
+=head2 ReportResults
 
 =over 4
 
@@ -303,10 +295,8 @@ sub _validate_version {
 
 <pre>
 a reference to a hash where the following keys are defined:
-receptor has a value which is a string
-ligand has a value which is a string
-center has a value which is a string
-size has a value which is a string
+report_name has a value which is a string
+report_ref has a value which is a string
 
 </pre>
 
@@ -315,40 +305,8 @@ size has a value which is a string
 =begin text
 
 a reference to a hash where the following keys are defined:
-receptor has a value which is a string
-ligand has a value which is a string
-center has a value which is a string
-size has a value which is a string
-
-
-=end text
-
-=back
-
-
-
-=head2 OutParams
-
-=over 4
-
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a reference to a hash where the following keys are defined:
-outname has a value which is a string
-
-</pre>
-
-=end html
-
-=begin text
-
-a reference to a hash where the following keys are defined:
-outname has a value which is a string
+report_name has a value which is a string
+report_ref has a value which is a string
 
 
 =end text

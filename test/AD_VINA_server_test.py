@@ -19,7 +19,22 @@ from AD_VINA.AD_VINAServer import MethodContext
 from AD_VINA.authclient import KBaseAuth as _KBaseAuth
 
 
+3dnf_clean_pdb = "37778/2/1"
+test_compound_set = "37778/4/2"
+
+
+
+
+
+
 class AD_VINATest(unittest.TestCase):
+
+    def test(self):
+        params = {
+            "pdb_refs": [3dnf_clean_pdb],
+            'ligand_list_ref': test_compound_set
+            }
+        ret = self.serviceImpl.ad_vina(self.ctx, params)
 
     @classmethod
     def setUpClass(cls):
@@ -57,31 +72,7 @@ class AD_VINATest(unittest.TestCase):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
 
-    def getWsClient(self):
-        return self.__class__.wsClient
-
-    def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_AD_VINA_" + str(suffix)
-        ret = self.getWsClient().create_workspace({'workspace': wsName})  # noqa
-        self.__class__.wsName = wsName
-        return wsName
-
-    def getImpl(self):
-        return self.__class__.serviceImpl
-
-    def getContext(self):
-        return self.__class__.ctx
-
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_AD_VINA(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
+    def _test_static_AD_VINA(self):
         inparams = {
             "receptor" : "lck_small.pdbqt",
             "ligand" : "lck-active-26.pdbqt",
@@ -90,9 +81,9 @@ class AD_VINATest(unittest.TestCase):
             "outname" : "out.pdbqt"
         }
         ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+
+
+
+        
 
 

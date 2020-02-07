@@ -1,5 +1,13 @@
 [ {
+  "module_name" : "CompoundSetUtils",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
   "module_name" : "KBaseReport",
+  "type" : "sdk",
+  "version_tag" : "release"
+}, {
+  "module_name" : "ProteinStructureUtils",
   "type" : "sdk",
   "version_tag" : "release"
 }, {

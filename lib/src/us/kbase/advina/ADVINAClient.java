@@ -11,6 +11,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
 
 /**
@@ -165,17 +166,18 @@ public class ADVINAClient {
     /**
      * <p>Original spec-file function name: ad_vina</p>
      * <pre>
+     * This example function accepts any number of parameters and returns results in a KBaseReport
      * </pre>
-     * @param   inparams   instance of type {@link us.kbase.advina.InParams InParams}
-     * @return   parameter "output" of type {@link us.kbase.advina.OutParams OutParams}
+     * @param   params   instance of mapping from String to unspecified object
+     * @return   parameter "output" of type {@link us.kbase.advina.ReportResults ReportResults}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public OutParams adVina(InParams inparams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public ReportResults adVina(Map<String,UObject> params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
-        args.add(inparams);
-        TypeReference<List<OutParams>> retType = new TypeReference<List<OutParams>>() {};
-        List<OutParams> res = caller.jsonrpcCall("AD_VINA.ad_vina", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        args.add(params);
+        TypeReference<List<ReportResults>> retType = new TypeReference<List<ReportResults>>() {};
+        List<ReportResults> res = caller.jsonrpcCall("AD_VINA.ad_vina", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

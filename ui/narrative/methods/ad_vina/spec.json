@@ -1,10 +1,10 @@
 {
     "ver": "0.0.1",
     "authors": [
-        "asedova"
+        "suminw, asedova"
     ],
     "contact": "help@kbase.us",
-    "categories": ["active","structural_genomics"],
+    "categories": ["active", "structural_genomics"],
     "widgets": {
         "input": null,
         "output": "no-display"
@@ -180,9 +180,13 @@
                     "target_property": "workspace_name"
                 },
                 {
+                    "narrative_system_variable": "workspace_id",
+                    "target_property": "workspace_id"
+                },
+                {
                     "input_parameter": "pdb_refs",
                     "target_property": "pdb_refs",
-                    "target_type_transform": "resolved-ref"
+                    "target_type_transform": "list<ref>"
                 },
                 {
                     "input_parameter": "ligand_list_ref",

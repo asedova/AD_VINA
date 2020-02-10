@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
 import os, sys
+import uuid
 
 from installed_clients.WorkspaceClient import Workspace
 from installed_clients.ProteinStructureUtilsClient import ProteinStructureUtils
 from installed_clients.CompoundSetUtilsClient import CompoundSetUtils
+from installed_clients.DataFileUtilClient import DataFileUtil
 
 from .util.KBaseObjUtil import *
 from .util.PrintUtil import *
+
+
 #END_HEADER
 
 
@@ -28,7 +32,7 @@ class AD_VINA:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/n1mus/AD_VINA"
-    GIT_COMMIT_HASH = "c01d599812cc938267e4222eb02dedf55b51183c"
+    GIT_COMMIT_HASH = "0ca1d536cbb7bbc4ef6ef8ea585f5d93c1b48469"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -36,11 +40,7 @@ class AD_VINA:
     # config contains contents of config file in a hash or None if it couldn't
     # be found
     def __init__(self, config):
-        #BEGIN_CONSTRUCTOR        
-        ws = Workspace(self.workspace_url)
-        psu = ProteinStructureUtils(self.callback_url)
-        csu = CompoundSetUtils(self.calback_utl)
-       
+        #BEGIN_CONSTRUCTOR
         cls = self.__class__
 
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
@@ -50,9 +50,16 @@ class AD_VINA:
         cls.config = config
 
         cls.suffix = str(uuid.uuid4())
+        
+        ws = Workspace(self.workspace_url)
+        dfu = DataFileUtil(self.callback_url)
+        psu = ProteinStructureUtils(self.callback_url)
+        csu = CompoundSetUtils(self.callback_url)
+       
 
         attr_d = {
             'ws': ws,
+            'dfu': dfu,
             'psu': psu,
             'csu': csu,
             'callback_url': cls.callback_url,
@@ -64,25 +71,33 @@ class AD_VINA:
 
         VarStash.update(attr_d)
 
-        dprint("sys.path", run=globals())
-        dprint('os.environ', run=globals())
+        dprint("sys.path", "os.environ", run=globals())
         dprint('config', run=locals())
 
         #END_CONSTRUCTOR
+        pass
 
 
-    def ad_vina(self, ctx, inparams):
+    def ad_vina(self, ctx, params):
         """
+        This example function accepts any number of parameters and returns results in a KBaseReport
         :param params: instance of mapping from String to unspecified object
-        :returns: instance of type "OutParams" -> structure: parameter
+        :returns: instance of type "ReportResults" -> structure: parameter
            "report_name" of String, parameter "report_ref" of String
         """
         # ctx is the context object
         # return variables are: output
-
         #BEGIN ad_vina
 
+
+        VarStash.update({
+            'ctx': ctx,
+            'workspace_id': params['workspace_id']
+            })
+
+        dprint('ctx', 'params', run={**locals(), **globals()})
         
+
         #####
         ####### 
         #########
@@ -93,10 +108,15 @@ class AD_VINA:
         #######
         #####
 
-        for upa in inparams['pdb_refs']
+        for upa in params['pdb_refs']:
 
             ProteinStructure(upa)
 
+        CompoundSet(params['ligand_list_ref'])
+
+
+
+        return None
 
             
 
@@ -105,13 +125,14 @@ class AD_VINA:
         
 
 
-        (cx, cy, cz)=map(lambda x: float(x), inparams["center"].split(','))
-        (sx, sy, sz)=map(lambda x: float(x), inparams["size"].split(','))
-        cmd = "vina --receptor %s --ligand %s --cpu 4 --center_x %f --center_y %f  --center_z %f --size_x %f --size_y %f --size_z %f --out %s" % (inparams["receptor"], inparams["ligand"], cx, cy, cz, sx, sy, sz, inparams["outname"])
-        print(cmd+"\n")
+        (cx, cy, cz)=[float(x) for x in params["center"].split(',')]
+        (sx, sy, sz)=[float(x) for x in params["size"].split(',')]
+        cmd = "vina --receptor %s --ligand %s --cpu 4 --center_x %f --center_y %f  --center_z %f --size_x %f --size_y %f --size_z %f --out %s" % (params["receptor"], params["ligand"], cx, cy, cz, sx, sy, sz, params["outname"])
+        print((cmd+"\n"))
         os.system(cmd)
         output = {}
 #        print(cmd)
+
         #END ad_vina
 
         # At some point might do deeper type checking...

@@ -43,3 +43,9 @@ def dprint(*args, run=False, **kwargs):
     print('--------------------------------------------------------------')
 
 
+def where_am_i(f):
+    '''
+    Decorator
+    '''
+    dprint("where am i? in module " + __name__ + " method " + f.__qualname__)
+    return f

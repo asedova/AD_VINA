@@ -9,6 +9,23 @@
         "input": null,
         "output": "no-display"
     },
+    "parameter-groups": [
+        {
+            "id": "search_space",
+            "parameters": [
+                "center_x",
+                "center_y",
+                "center_z",
+                "size_x",
+                "size_y",
+                "size_z"
+            ],
+            "optional": false,
+            "advanced": false,
+            "allow_multiple: false:
+            "with_border": false
+        }
+    ],
     "parameters": [ 
         {
             "id": "pdb_refs",
@@ -142,6 +159,19 @@
             }
         },
         {
+            "id": "seed",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : 0,
+               "max_int" : 999999
+            }
+        },
+        {
             "id": "exhaustiveness",
             "optional": true,
             "advanced": true,
@@ -194,6 +224,10 @@
                     "target_type_transform": "resolved-ref"
                 },
                 {
+                    "input_parameter": "search_space",
+                    "target_property": "search_space"
+                },
+                {
                     "input_parameter": "center_x",
                     "target_property": "center_x"
                 },
@@ -220,6 +254,10 @@
                 {
                     "input_parameter": "num_modes",
                     "target_property": "num_modes"
+                },
+                {
+                    "input_parameter": "seed",
+                    "target_property": "seed"
                 },
                 {
                     "input_parameter": "energy_range",

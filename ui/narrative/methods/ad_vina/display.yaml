@@ -89,23 +89,45 @@ parameters :
         ui-name : |
             Number of modes
         short-hint : |
-            Number of modes to try
+            Maximum number of binding modes to generate
         long-hint  : |
-            Number of modes to try
+            Maximum number of binding modes to generate
     energy_range :
         ui-name : |
             Energy range
         short-hint : |
-            Range of energies to try
+            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
         long-hint  : |
-            Range of energies to try
+            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
+    seed :
+        ui-name : |
+            Seed
+        short-hint : |
+            Explicit random seed
+        long-hint : |
+            Explicit random seed
     exhaustiveness :
         ui-name : |
             Exhaustiveness
         short-hint : |
-            Exhaustiveness of analysis
+            Exhaustiveness of the global search (roughly proportional to time)
         long-hint  : |
-            Exhaustiveness of analysis
+            <p>With the default (or any given) setting of <code>exhaustiveness</code>, the time spent on the search is already varied heuristically depending on the number of atoms, flexibility, etc. 
+            Normally, it does not make sense to spend extra time searching to reduce the probability of not finding the global minimum of the scoring function beyond what is significantly lower than the probability that the minimum is far from the native conformation.
+            However, if you feel that the automatic trade-off made between exhaustiveness and time is inadequate, you can increase the <code>exhaustiveness</code> level. This should increase the time linearly and decrease the probability of not finding the minimum exponentially. </p>
+            <p>What does "exhaustiveness" really control, under the hood?</p>
+            <p>In the current implementation, the docking calculation consists of a number of independent <i>runs</i>, starting from random conformations.
+            Each of these <i>runs</i> consists of a number of sequential <i>steps</i>. Each <i>step</i> involves a random perturbation of the conformation followed
+            by a local optimization (using the Broyden-Fletcher-Goldfarb-Shanno algorithm) and a selection in which the <i>step</i> is either accepted or not. 
+            Each local optimization involves many <i>evaluations</i> of the scoring function as well as
+            its derivatives in the <i>position-orientation-torsions</i> coordinates.
+            The number of <i>evaluations</i> in a local optimization is guided by convergence and other criteria.
+            The number of <i>steps</i> in a <i>run</i> is determined heuristically, depending on the size and flexibility of the ligand and the flexible side chains. 
+            However, the number of <i>runs</i> is set by the <code>exhaustiveness</code> parameter. 
+            Since the individual <i>runs</i> are executed in parallel, where appropriate, <code>exhaustiveness</code> also limits the parallelism.
+            Unlike in AutoDock 4, in AutoDock Vina, each <i>run</i> can produce several results: 
+            promising intermediate results are remembered.
+            These are merged, refined, clustered and sorted automatically to produce the final result.</p>
     dockingscore_name :
         ui-name : |
             Output score matrix
@@ -113,6 +135,16 @@ parameters :
             Supply a name to use for the output score matrix
         long-hint  : |
             Supply a name to use for the output score matrix
+
+parameter-groups:
+    search_space:
+        ui-name: |
+            Search space
+        short-hint: |
+            Protein space to explore ligand and flexible side chain positions
+        long-hint: |
+            The smaller the search space, the easier it is for the docking algorithm to explore it. On the other hand, it will not explore ligand and flexible side chain atom positions outside the search space. 
+
 description : |
     <p>First test of Autodock Vina protein-ligand docking tool.</p>
 

@@ -9,7 +9,7 @@ print = functools.partial(print, flush=True)
 subprocess.run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 
-def dprint(*args, run=False, **kwargs):
+def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
     print = functools.partial(globals()['print'], **kwargs)
 
     def try_json_print(arg):
@@ -30,7 +30,7 @@ def dprint(*args, run=False, **kwargs):
         if run:
             print('>> ' + arg)
             if run in ['cli']:
-                completed_proc = subprocess.run(arg)
+                completed_proc = subprocess.run(arg, **subproc_run_kwargs)
                 try_json_print(completed_proc.stdout.decode('utf-8'))
                 try_json_print(completed_proc.stderr.decode('utf-8'))
             elif isinstance(run, dict):
@@ -47,5 +47,5 @@ def where_am_i(f):
     '''
     Decorator
     '''
-    dprint("where am i? in module " + __name__ + " method " + f.__qualname__)
+    dprint("where am i? in module " + globals()['__name__'] + " method " + f.__qualname__)
     return f

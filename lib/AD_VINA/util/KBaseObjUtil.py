@@ -1,6 +1,7 @@
 import tarfile
 import os
-
+import subprocess
+import numpy as np
 
 from .PrintUtil import *
 
@@ -35,21 +36,56 @@ class ProteinStructure:
         else: raise NotImplementedError()
 
 
+
     def load(self):
         
-        output = VarStash.psu.structure_to_pdb_file({
+        out_psu_stpf = VarStash.psu.structure_to_pdb_file({
             "input_ref": self.upa, 
             "destination_dir": VarStash.shared_folder
             }
         )
         
-        dprint('output', run=locals())
-        dprint(f"ls {VarStash.shared_folder}", run='cli')
+        dprint('out_psu_stpf', run=locals())
         
-        self.pdb_filepath = output["file_path"]
- 
+        self.pdb_filepath = out_psu_stpf["file_path"]
         
+        pdb_filename = os.path.basename(self.pdb_filepath)
+        if pdb_filename.endswith('.pdb'):
+            self.name = pdb_filename[:-4]
+        else:
+            self.name = pdb_filename
 
+
+    def calc_center_size(self):
+        coords_filepath = os.path.join(VarStash.shared_folder, 'atom_coords_' + self.name + '_' + VarStash.suffix)
+
+        cmd = rf"sed -n '/^ATOM/p' {self.pdb_filepath} | cut -c 31-54 > {coords_filepath}"
+        dprint(cmd, run='cli')
+
+        with open(coords_filepath) as f:
+            min_l = np.array([np.inf, np.inf, np.inf])
+            max_l = np.array([-np.inf, -np.inf, -np.inf])
+            for line in f:
+                coords = np.array([float(tok.strip()) for tok in [line[:8], line[8:16], line[16:24]]])
+                min_l[coords < min_l] = coords[coords < min_l]
+                max_l[coords > max_l] = coords[coords > max_l]
+
+
+        self.center = (min_l + max_l) / 2
+        self.size = max_l - min_l
+
+        dprint('self.center', 'self.size', run=locals())
+
+
+    def convert_to_pdbqt(self):
+
+        prepare_receptor4_filepath = '/usr/local/bin/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py'
+        self.pdbqt_filepath = self.pdb_filepath + 'qt'
+
+        cmd = f"python2.5 {prepare_receptor4_filepath} -r {self.pdb_filepath} -o {self.pdbqt_filepath}"
+
+        subprocess.run(cmd)
+       
 
 
 
@@ -67,34 +103,46 @@ class CompoundSet:
     @where_am_i
     def load(self):
 
-        dprint(f'ls -R {VarStash.shared_folder}', run='cli')
-
         out_csu_fmffz = VarStash.csu.fetch_mol2_files_from_zinc({
             'workspace_id': VarStash.workspace_id,
             'compoundset_ref': self.upa
             })
 
-        #compoundset_obj = VarStash.dfu.get_objects({
-        #    'object_refs': [output['compoundset_ref']]
-        #    })['data'][0]
 
-        #dprint('compoundset_obj', run=locals())
+        ###
+        ###
+        ### compounds with/without mol2
 
-        #dprint("[i.get('mol2_handle_ref') for i in compoundset_obj['data']['compounds']]", run=locals())
+        compoundset_objData = VarStash.dfu.get_objects({
+            'object_refs': [out_csu_fmffz['compoundset_ref']]
+            })['data'][0]['data']
+
+        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in compoundset_objData['compounds']}
+
+        self.comp_id_l = list(self.comp_id_to_mol2_handle_ref.keys())
+
+        self.comp_id_w_mol2 = [comp_id for comp_id in self.comp_id_l if self.comp_id_to_mol2_handle_ref[comp_id]]
+        self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
+
+        assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
+
+        ###
+        ###
+        ###
 
         dprint('out_csu_fmffz', run=locals())
-        dprint(f'ls -R {VarStash.shared_folder}', run='cli')
         
         out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
             'input_ref': out_csu_fmffz['compoundset_ref']
             })
 
-
         dprint('out_csu_ccmftp', run=locals())
-        dprint(f"ls -R {VarStash.shared_folder}", run='cli')
 
-        self.pdbqt_dir = os.path.dirname(out_csu_ccmftp['packed_pdbqt_files_path']
-        self.compound_to_pbdqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
+        self.pdbqt_dir = os.path.dirname(out_csu_ccmftp['packed_pdbqt_files_path'])
+        self.compound_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
+
+        self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.compound_to_pdbqtFileName_d.values()]
+        self.pdbqt_compound_l = [compound for compound in self.compound_to_pdbqtFileName_d.keys()]
 
         '''
         output = VarStash.csu.compound_set_to_file({
@@ -114,11 +162,8 @@ class CompoundSet:
         '''
 
 
-    def untargz(self):
-        with tarfile.open(self.mol2_tarball_filepath) as tar:
-            tar.extractall(path=VarStash.shared_folder)
 
-        dprint(f"ls {VarStash.shared_folder}", run=globals())
+        
         
         
 

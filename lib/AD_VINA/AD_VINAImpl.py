@@ -98,32 +98,84 @@ class AD_VINA:
         dprint('ctx', 'params', run={**locals(), **globals()})
         
 
+        ##
+        ### 
+        ####
         #####
-        ####### 
-        #########
-        #########
-        ######### dl pdb
-        #########
-        #########
-        #######
+        ###### default params
         #####
+        ####
+        ###
+        ##
+
+        params_default = {
+            'num_modes': 1000,
+            'energy_range': 10,
+            'exhaustiveness': 20,
+            }
+
+
+
+        ##
+        ### 
+        ####
+        #####
+        ###### seed
+        #####
+        ####
+        ###
+        ##
+
+
+
+
+        ##
+        ### 
+        ####
+        #####
+        ###### dl
+        #####
+        ####
+        ###
+        ##
 
         for upa in params['pdb_refs']:
 
-            ProteinStructure(upa)
+            ps = ProteinStructure(upa)
+            ps.calc_center_size()
+            ps.convert_to_pdbqt()
 
-        CompoundSet(params['ligand_list_ref'])
+        cs = CompoundSet(params['ligand_list_ref'])
+
+
+        ##
+        ### 
+        ####
+        #####
+        ###### run
+        #####
+        ####
+        ###
+        ##
 
 
 
-        return None
+        for ps in ProteinStructure.created_instances:
+            for ligand_name, ligand_pdbqt_filepath in zip(cs.pdbqt_compound_l, cs.pdbqt_filepath_l):
+     
+                run_name = ligand_name + '_vs_' + ps.name
 
-            
+                cmd = ( f"vina --receptor {ps.pdbqt_filepath} --ligand {ligand_pdbqt_filepath} "
+                        f"--cpu 4 --log {run_name + '.log'} "
+                        f"--center_x {ps.center[0]} --center_y {ps.center[1]} --center_z {ps.center[2]} "
+                        f"--size_x {ps.size[0]} --size_y {ps.size[1]} --size_z {ps.size[2]} "
+                        f"--out {run_name + '.pdbqt'}" )
+                
+                dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
 
-       
         
         
-
+        """
 
         (cx, cy, cz)=[float(x) for x in params["center"].split(',')]
         (sx, sy, sz)=[float(x) for x in params["size"].split(',')]
@@ -131,8 +183,10 @@ class AD_VINA:
         print((cmd+"\n"))
         os.system(cmd)
         output = {}
-#        print(cmd)
+        print(cmd)
 
+        """
+        return None
         #END ad_vina
 
         # At some point might do deeper type checking...

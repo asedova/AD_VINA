@@ -1,4 +1,4 @@
-FROM kbase/kbase:sdkbase2.latest
+FROM kbase/sdkbase2:python
 MAINTAINER KBase Developer
 # -----------------------------------------
 # In this section, you can install any system dependencies required
@@ -6,10 +6,15 @@ MAINTAINER KBase Developer
 # install line here, a git checkout to download code, or run any other
 # installation scripts.
 
-# RUN apt-get update
+#RUN apt-get update
 
-RUN cd / && wget http://vina.scripps.edu/download/autodock_vina_1_1_2_linux_x86.tgz && tar -xzf autodock_vina_1_1_2_linux_x86.tgz 
-  
+RUN curl --location  http://vina.scripps.edu/download/autodock_vina_1_1_2_linux_x86.tgz > autodock_vina.tar.gz && \
+tar -vxzf autodock_vina.tar.gz && \ 
+mv autodock_vina_1_1_2_linux_x86 /usr/local/bin/ && \
+rm autodock_vina.tar.gz
+
+ENV PATH="${PATH}:/usr/local/bin/autodock_vina_1_1_2_linux_x86/bin" 
+ 
 # -----------------------------------------
 
 COPY ./ /kb/module

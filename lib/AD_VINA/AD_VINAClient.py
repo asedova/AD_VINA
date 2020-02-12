@@ -6,15 +6,15 @@
 #
 ############################################################
 
-from __future__ import print_function
+
 # the following is a hack to get the baseclient to import whether we're in a
 # package or not. This makes pep8 unhappy hence the annotations.
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
-    from baseclient import BaseClient as _BaseClient  # @Reimport
+    from .baseclient import BaseClient as _BaseClient  # @Reimport
 
 
 class AD_VINA(object):
@@ -23,7 +23,7 @@ class AD_VINA(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login'):
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login'):
         if url is None:
             raise ValueError('A url is required')
         self._service_ver = None
@@ -33,17 +33,15 @@ class AD_VINA(object):
             trust_all_ssl_certificates=trust_all_ssl_certificates,
             auth_svc=auth_svc)
 
-    def ad_vina(self, inparams, context=None):
+    def ad_vina(self, params, context=None):
         """
-        :param inparams: instance of type "InParams" -> structure: parameter
-           "receptor" of String, parameter "ligand" of String, parameter
-           "center" of String, parameter "size" of String
-        :returns: instance of type "OutParams" -> structure: parameter
-           "outname" of String
+        This example function accepts any number of parameters and returns results in a KBaseReport
+        :param params: instance of mapping from String to unspecified object
+        :returns: instance of type "ReportResults" -> structure: parameter
+           "report_name" of String, parameter "report_ref" of String
         """
-        return self._client.call_method(
-            'AD_VINA.ad_vina',
-            [inparams], self._service_ver, context)
+        return self._client.call_method('AD_VINA.ad_vina',
+                                        [params], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('AD_VINA.status',

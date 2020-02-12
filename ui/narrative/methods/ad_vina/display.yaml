@@ -4,7 +4,8 @@
 name: Autodock Vina Protein-Ligand Docking
 
 tooltip: |
-    First test of protein-ligand docking tool
+    Protein-ligand docking
+
 screenshots: []
 
 icon: icon.png

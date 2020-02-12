@@ -1,25 +1,41 @@
 # -*- coding: utf-8 -*-
 import unittest
-import os  # noqa: F401
+import os, sys  # noqa: F401
 import json  # noqa: F401
 import time
 import requests
-
+import uuid
 from os import environ
-try:
-    from ConfigParser import ConfigParser  # py2
-except:
-    from configparser import ConfigParser  # py3
+from configparser import ConfigParser  # py3
 
-from pprint import pprint  # noqa: F401
+
 
 from biokbase.workspace.client import Workspace as workspaceService
 from AD_VINA.AD_VINAImpl import AD_VINA
 from AD_VINA.AD_VINAServer import MethodContext
 from AD_VINA.authclient import KBaseAuth as _KBaseAuth
 
+from AD_VINA.util.PrintUtil import *
+
+
+
+_3dnf_clean_pdb = "37778/2/1"
+test_compound_set = "37778/4/3"
+
+
+
+
+
 
 class AD_VINATest(unittest.TestCase):
+
+    def test(self):
+        params = {
+            "pdb_refs": [_3dnf_clean_pdb],
+            'ligand_list_ref': test_compound_set,
+            'workspace_id': self.wsId
+            }
+        ret = self.serviceImpl.ad_vina(self.ctx, params)
 
     @classmethod
     def setUpClass(cls):
@@ -47,9 +63,13 @@ class AD_VINATest(unittest.TestCase):
                         'authenticated': 1})
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL)
+        cls.wsId = cls.wsClient.create_workspace({'workspace': 'AD_VINA_' + str(uuid.uuid4())})[0]
+        dprint(cls.wsId, type(cls.wsId))
         cls.serviceImpl = AD_VINA(cls.cfg)
         cls.scratch = cls.cfg['scratch']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
+
+
 
     @classmethod
     def tearDownClass(cls):
@@ -57,31 +77,7 @@ class AD_VINATest(unittest.TestCase):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
 
-    def getWsClient(self):
-        return self.__class__.wsClient
-
-    def getWsName(self):
-        if hasattr(self.__class__, 'wsName'):
-            return self.__class__.wsName
-        suffix = int(time.time() * 1000)
-        wsName = "test_AD_VINA_" + str(suffix)
-        ret = self.getWsClient().create_workspace({'workspace': wsName})  # noqa
-        self.__class__.wsName = wsName
-        return wsName
-
-    def getImpl(self):
-        return self.__class__.serviceImpl
-
-    def getContext(self):
-        return self.__class__.ctx
-
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    def test_AD_VINA(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
+    def _test_static_AD_VINA(self):
         inparams = {
             "receptor" : "lck_small.pdbqt",
             "ligand" : "lck-active-26.pdbqt",
@@ -90,9 +86,9 @@ class AD_VINATest(unittest.TestCase):
             "outname" : "out.pdbqt"
         }
         ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        pass
+
+
+
+        
 
 

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: OutParams</p>
+ * <p>Original spec-file type: ReportResults</p>
  * 
  * 
  */
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "report_name",
     "report_ref"
 })
-public class OutParams {
+public class ReportResults {
 
     @JsonProperty("report_name")
     private String reportName;
@@ -40,7 +40,7 @@ public class OutParams {
         this.reportName = reportName;
     }
 
-    public OutParams withReportName(String reportName) {
+    public ReportResults withReportName(String reportName) {
         this.reportName = reportName;
         return this;
     }
@@ -55,7 +55,7 @@ public class OutParams {
         this.reportRef = reportRef;
     }
 
-    public OutParams withReportRef(String reportRef) {
+    public ReportResults withReportRef(String reportRef) {
         this.reportRef = reportRef;
         return this;
     }
@@ -72,7 +72,7 @@ public class OutParams {
 
     @Override
     public String toString() {
-        return ((((((("OutParams"+" [reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("ReportResults"+" [reportName=")+ reportName)+", reportRef=")+ reportRef)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -29,7 +29,7 @@ suggestions:
 # Configure the display and description of parameters
 #
 parameters :
-    pdb_refs :
+    pdb_ref :
         ui-name : |
             Protein structures
         short-hint : |
@@ -85,20 +85,6 @@ parameters :
             Z-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
         long-hint  : |
             Z-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
-    num_modes :
-        ui-name : |
-            Number of modes
-        short-hint : |
-            Maximum number of binding modes to generate
-        long-hint  : |
-            Maximum number of binding modes to generate
-    energy_range :
-        ui-name : |
-            Energy range
-        short-hint : |
-            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
-        long-hint  : |
-            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
     seed :
         ui-name : |
             Seed
@@ -128,6 +114,20 @@ parameters :
             Unlike in AutoDock 4, in AutoDock Vina, each <i>run</i> can produce several results: 
             promising intermediate results are remembered.
             These are merged, refined, clustered and sorted automatically to produce the final result.</p>
+    num_modes :
+        ui-name : |
+            Number of modes
+        short-hint : |
+            Maximum number of binding modes to generate
+        long-hint  : |
+            Maximum number of binding modes to generate
+    energy_range :
+        ui-name : |
+            Energy range
+        short-hint : |
+            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
+        long-hint  : |
+            Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
     dockingscore_name :
         ui-name : |
             Output score matrix

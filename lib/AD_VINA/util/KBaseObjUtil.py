@@ -57,7 +57,7 @@ class ProteinStructure:
 
 
     def calc_center_size(self):
-        coords_filepath = os.path.join(VarStash.shared_folder, 'atom_coords_' + self.name + '_' + VarStash.suffix)
+        coords_filepath = os.path.join(VarStash.shared_folder, 'atom_coords_' + self.name + VarStash.suffix)
 
         cmd = rf"sed -n '/^ATOM/p' {self.pdb_filepath} | cut -c 31-54 > {coords_filepath}"
         dprint(cmd, run='cli')
@@ -109,17 +109,24 @@ class CompoundSet:
             })
 
 
-        ###
-        ###
-        ### compounds with/without mol2
-
         compoundset_objData = VarStash.dfu.get_objects({
             'object_refs': [out_csu_fmffz['compoundset_ref']]
             })['data'][0]['data']
 
-        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in compoundset_objData['compounds']}
+        self.comp_id_l = [compound['id'] for comount in compoundset_objData['compounds']]
 
-        self.comp_id_l = list(self.comp_id_to_mol2_handle_ref.keys())
+
+        ##
+        ## compound names
+
+        self.comp_id_to_name = {compound['id']: compound['name'] for compound in compoundset_objData['compounds']}
+
+
+        ###
+        ### compounds with/without mol2
+
+
+        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in compoundset_objData['compounds']}
 
         self.comp_id_w_mol2 = [comp_id for comp_id in self.comp_id_l if self.comp_id_to_mol2_handle_ref[comp_id]]
         self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
@@ -127,8 +134,7 @@ class CompoundSet:
         assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
 
         ###
-        ###
-        ###
+        ### filepaths
 
         dprint('out_csu_fmffz', run=locals())
         
@@ -139,10 +145,10 @@ class CompoundSet:
         dprint('out_csu_ccmftp', run=locals())
 
         self.pdbqt_dir = os.path.dirname(out_csu_ccmftp['packed_pdbqt_files_path'])
-        self.compound_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
+        self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
 
-        self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.compound_to_pdbqtFileName_d.values()]
-        self.pdbqt_compound_l = [compound for compound in self.compound_to_pdbqtFileName_d.keys()]
+        self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
+        self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
 
         '''
         output = VarStash.csu.compound_set_to_file({

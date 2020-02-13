@@ -20,18 +20,18 @@
                 "size_y",
                 "size_z"
             ],
-            "optional": false,
-            "advanced": false,
+            "optional": true,
+            "advanced": true,
             "allow_multiple": false,
             "with_border": false
         }
     ],
     "parameters": [ 
         {
-            "id": "pdb_refs",
+            "id": "pdb_ref",
             "optional": false,
             "advanced": false,
-            "allow_multiple": true,
+            "allow_multiple": false,
             "default_values": [ "" ],
             "field_type": "text",
             "text_options" : {
@@ -133,6 +133,32 @@
             }
         },
         {
+            "id": "seed",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : -9999999999,
+               "max_int" : 9999999999
+            }
+        },
+        {
+            "id": "exhaustiveness",
+            "optional": true,
+            "advanced": true,
+            "allow_multiple": false,
+            "default_values": [ "20" ],
+            "field_type": "text",
+            "text_options" : {
+               "validate_as" : "int",
+               "min_int" : 1,
+               "max_int" : 200
+            }
+        },
+        {
             "id": "num_modes",
             "optional": true,
             "advanced": true,
@@ -156,32 +182,6 @@
                "validate_as" : "int",
                "min_int" : 0,
                "max_int" : 10000
-            }
-        },
-        {
-            "id": "seed",
-            "optional": true,
-            "advanced": true,
-            "allow_multiple": false,
-            "default_values": [ "" ],
-            "field_type": "text",
-            "text_options" : {
-               "validate_as" : "int",
-               "min_int" : 0,
-               "max_int" : 999999
-            }
-        },
-        {
-            "id": "exhaustiveness",
-            "optional": true,
-            "advanced": true,
-            "allow_multiple": false,
-            "default_values": [ "20" ],
-            "field_type": "text",
-            "text_options" : {
-               "validate_as" : "int",
-               "min_int" : 0,
-               "max_int" : 200
             }
         },
         {
@@ -214,8 +214,8 @@
                     "target_property": "workspace_id"
                 },
                 {
-                    "input_parameter": "pdb_refs",
-                    "target_property": "pdb_refs",
+                    "input_parameter": "pdb_ref",
+                    "target_property": "pdb_ref",
                     "target_type_transform": "list<ref>"
                 },
                 {

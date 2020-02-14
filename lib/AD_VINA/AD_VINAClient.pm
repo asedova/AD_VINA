@@ -194,6 +194,91 @@ This example function accepts any number of parameters and returns results in a 
     }
 }
  
+
+
+=head2 mol2_to_pdbqt
+
+  $pdbqt_file_path = $obj->mol2_to_pdbqt($mol2_file_path, $compound_id)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$mol2_file_path is a string
+$compound_id is a string
+$pdbqt_file_path is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$mol2_file_path is a string
+$compound_id is a string
+$pdbqt_file_path is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub mol2_to_pdbqt
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 2)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function mol2_to_pdbqt (received $n, expecting 2)");
+    }
+    {
+	my($mol2_file_path, $compound_id) = @args;
+
+	my @_bad_arguments;
+        (!ref($mol2_file_path)) or push(@_bad_arguments, "Invalid type for argument 1 \"mol2_file_path\" (value was \"$mol2_file_path\")");
+        (!ref($compound_id)) or push(@_bad_arguments, "Invalid type for argument 2 \"compound_id\" (value was \"$compound_id\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to mol2_to_pdbqt:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'mol2_to_pdbqt');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "AD_VINA.mol2_to_pdbqt",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'mol2_to_pdbqt',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method mol2_to_pdbqt",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'mol2_to_pdbqt',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -237,16 +322,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'ad_vina',
+                method_name => 'mol2_to_pdbqt',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method ad_vina",
+            error => "Error invoking method mol2_to_pdbqt",
             status_line => $self->{client}->status_line,
-            method_name => 'ad_vina',
+            method_name => 'mol2_to_pdbqt',
         );
     }
 }

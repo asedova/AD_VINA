@@ -98,8 +98,15 @@ class AD_VINATest(unittest.TestCase):
         }
         ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
 
+    def test_mol2_to_pdbqt(self):
 
+        mol2_file_path = os.path.join('data', 'cpd00094.mol2')
+        compound_id = 'cpd00094'
 
-        
+        pdbqt_file_path = self.serviceImpl.mol2_to_pdbqt(self.ctx,
+                                                         mol2_file_path=mol2_file_path,
+                                                         compound_id=compound_id)[0]
 
-
+        self.assertEqual(os.path.basename(pdbqt_file_path), compound_id + '.pdbqt')
+        self.assertTrue(os.path.exists(pdbqt_file_path))
+        self.assertTrue(os.path.getsize(pdbqt_file_path) > 0)

@@ -2,14 +2,15 @@ import tarfile
 import os
 import subprocess
 import numpy as np
+import uuid
+import logging
+from subprocess import Popen, PIPE
 
 from .PrintUtil import *
 
 #from installed_clients.WorkspaceClient import Workspace
 #from installed_clients.ProteinStructureUtilsClient import ProteinStructureUtils
 #from installed_clients.CompoundSetUtilsClient import CompoundSetUtils
-
-
 
 
 class VarStash:
@@ -38,17 +39,17 @@ class ProteinStructure:
 
 
     def load(self):
-        
+
         out_psu_stpf = VarStash.psu.structure_to_pdb_file({
-            "input_ref": self.upa, 
+            "input_ref": self.upa,
             "destination_dir": VarStash.shared_folder
             }
         )
-        
+
         dprint('out_psu_stpf', run=locals())
-        
+
         self.pdb_filepath = out_psu_stpf["file_path"]
-        
+
         pdb_filename = os.path.basename(self.pdb_filepath)
         if pdb_filename.endswith('.pdb'):
             self.name = pdb_filename[:-4]
@@ -85,20 +86,28 @@ class ProteinStructure:
         cmd = f"python2.5 {prepare_receptor4_filepath} -r {self.pdb_filepath} -o {self.pdbqt_filepath}"
 
         subprocess.run(cmd)
-       
+
 
 
 
 class CompoundSet:
 
     created_instances = []
+    AUTODOCKER_UTIL_DIR = '/usr/local/bin/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24'
 
     def __init__(self, upa, get_file='load'):
         self.created_instances.append(self)
         self.upa = upa
 
-        if get_file == 'load': self.load()
-        else: raise NotImplementedError()
+        if get_file == 'load':
+            self.load()
+        elif get_file == 'do_nothing':
+            pass
+        else:
+            raise NotImplementedError()
+
+        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
 
     @where_am_i
     def load(self):
@@ -137,7 +146,7 @@ class CompoundSet:
         ### filepaths
 
         dprint('out_csu_fmffz', run=locals())
-        
+
         out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
             'input_ref': out_csu_fmffz['compoundset_ref']
             })
@@ -150,8 +159,6 @@ class CompoundSet:
         self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
         self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
 
-
-        
     def split_multiple_models(self):
 
         pdbqt_multiple_model_filepath_l = []
@@ -177,17 +184,38 @@ class CompoundSet:
         # copy first model into self.pdbqt_dir
         for pdbqt_filepath in pdbqt_multiple_model_filepath_l:
             pdbqt_filename = os.path.basename(pdbqt_filepath)
-            
+
             splitting_dir = 'split_' + pdbqt_filename + VarStash.suffix
             os.mkdir(splitting_dir)
-            
+
             cmd = f"vina_split --input {pdbqt_filepath} --ligand 0"
             dprint(cmd, run='cli', subproc_run_kwargs={'cwd': splitting_dir})
-            
+
             keep_filename = sorted(os.listdir(splitting_dir))[0]
             cmd = f"cp {os.path.join(splitting_dir, keep_filename)} {pdbqt_filepath}"
             dprint(cmd, run='cli')
 
+    def mol2_to_pdbqt(self, mol2_file_path, shared_folder, compound_id):
 
-        
+        logging.info('start converting mol2 to pdbqt')
 
+        pdbqt_temp_dir = "{}/{}".format(shared_folder, uuid.uuid4())
+        os.mkdir(pdbqt_temp_dir)
+
+        pdbqt_file_path = os.path.join(pdbqt_temp_dir, compound_id + '.pdbqt')
+
+        prepare_ligand4_filepath = os.path.join(self.AUTODOCKER_UTIL_DIR, 'prepare_ligand4.py')
+
+        command = ['python2.5', prepare_ligand4_filepath, '-l', mol2_file_path, '-o', pdbqt_file_path]
+
+        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
+
+        logging.info('completed prepare_ligand4\nstdout:{}\nstderr:{}\n'.format(stdout, stderr))
+
+        file_size = os.path.getsize(pdbqt_file_path)
+
+        if file_size == 0:
+            logging.warning('generated empty pdbqt file')
+
+        return pdbqt_file_path

@@ -24,6 +24,12 @@ test_compound_set = "37778/4/3"
 
 
 
+defaults = {
+    'exhaustiveness': '8',
+    'num_modes': 9,
+    'energy_range': 3
+    }
+
 
 
 
@@ -31,9 +37,11 @@ class AD_VINATest(unittest.TestCase):
 
     def test(self):
         params = {
-            "pdb_refs": [_3dnf_clean_pdb],
+            "pdb_ref": _3dnf_clean_pdb,
             'ligand_list_ref': test_compound_set,
-            'workspace_id': self.wsId
+            'workspace_id': self.wsId,
+            'workspace_name': self.wsName,
+            **defaults,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
 
@@ -63,12 +71,15 @@ class AD_VINATest(unittest.TestCase):
                         'authenticated': 1})
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL)
-        cls.wsId = cls.wsClient.create_workspace({'workspace': 'AD_VINA_' + str(uuid.uuid4())})[0]
+        cls.wsName = 'AD_VINA_' + str(uuid.uuid4())
+        cls.wsId = cls.wsClient.create_workspace({'workspace': cls.wsName})[0]
         dprint(cls.wsId, type(cls.wsId))
         cls.serviceImpl = AD_VINA(cls.cfg)
         cls.scratch = cls.cfg['scratch']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
 
+        cmd = f"rm -rf /kb/module/work/tmp/*"
+        dprint(cmd, run='cli')
 
 
     @classmethod

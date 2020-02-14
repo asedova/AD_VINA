@@ -113,7 +113,7 @@ class CompoundSet:
             'object_refs': [out_csu_fmffz['compoundset_ref']]
             })['data'][0]['data']
 
-        self.comp_id_l = [compound['id'] for comount in compoundset_objData['compounds']]
+        self.comp_id_l = [compound['id'] for compound in compoundset_objData['compounds']]
 
 
         ##
@@ -150,26 +150,44 @@ class CompoundSet:
         self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
         self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
 
-        '''
-        output = VarStash.csu.compound_set_to_file({
-            "compound_set_ref": self.upa,
-            "output_format": "mol2"
-            }
-        )
-        
-        self.mol2_tarball_filepath = output["packed_mol2_files_path"]
-
-        ###############
-
-        packed_pdbqt_files_path, comp_id_pdbqt_file_name_map = VarStash.csu._covert_mol2_files_to_pdbqt(self.upa)
-
-        dprint('packed_pdbqt_files_path', 'comp_id_pdbqt_file_name_map', run=locals())
-
-        '''
-
-
 
         
-        
+    def split_multiple_models(self):
+
+        pdbqt_multiple_model_filepath_l = []
+
+        # find multiple models
+
+        for filepath in self.pdbqt_filepath_l:
+            with open(filepath) as f:
+                for line in f:
+                    if line.strip() == '':
+                        continue
+                    elif line.startswith('MODEL'):
+                        if line.strip().endswith('1'):
+                            pdbqt_multiple_model_filepath_l.append(filepath)
+                            break
+                        else:
+                            raise Exception("Unknown pdbqt format")
+                    else:
+                        break
+
+        # for each
+        # split in splitting dir
+        # copy first model into self.pdbqt_dir
+        for pdbqt_filepath in pdbqt_multiple_model_filepath_l:
+            pdbqt_filename = os.path.basename(pdbqt_filepath)
+            
+            splitting_dir = 'split_' + pdbqt_filename + VarStash.suffix
+            os.mkdir(splitting_dir)
+            
+            cmd = f"vina_split --input {pdbqt_filepath} --ligand 0"
+            dprint(cmd, run='cli', subproc_run_kwargs={'cwd': splitting_dir})
+            
+            keep_filename = sorted(os.listdir(splitting_dir))[0]
+            cmd = f"cp {os.path.join(splitting_dir, keep_filename)} {pdbqt_filepath}"
+            dprint(cmd, run='cli')
+
+
         
 

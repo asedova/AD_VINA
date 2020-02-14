@@ -4,6 +4,7 @@ import os, sys, shutil
 import uuid
 
 from installed_clients.WorkspaceClient import Workspace
+from installed_clients.KBaseReportClient import KBaseReport
 from installed_clients.ProteinStructureUtilsClient import ProteinStructureUtils
 from installed_clients.CompoundSetUtilsClient import CompoundSetUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
@@ -126,9 +127,8 @@ class AD_VINA:
         params_all = list(param_arg_d.keys())
 
         intersection = [param in params_all for param in params_search_space]
-        if len(intersection) > 0:
-            if intersection != params_search_space:
-                raise ValueError("If any of search space is entered, all entries (center (x,y,z) and size (x,y,z)) must be specified")
+        if not all(intersection) and any(intersection):
+            raise ValueError("If any of search space is entered, all entries (center (x,y,z) and size (x,y,z)) must be specified")
             
 
         
@@ -148,7 +148,8 @@ class AD_VINA:
         ps.calc_center_size()
         ps.convert_to_pdbqt()
 
-        cs = CompoundSet(params['ligand_list_ref'])
+        cs = CompoundSet(param_arg_d['ligand_list_ref'])
+        cs.split_multiple_models()
 
 
         ##
@@ -250,8 +251,8 @@ class AD_VINA:
             '''
             For regular directories or html directories
             '''
-            dfu_fileToShock_ret = self.dfu.file_to_shock({
-                'file_path': dir,
+            dfu_fileToShock_ret = VarStash.dfu.file_to_shock({
+                'file_path': dir_path,
                 'make_handle': 0,
                 'pack': 'zip',
                 })
@@ -265,11 +266,11 @@ class AD_VINA:
             return dir_shockInfo
 
 
-        dir_retFiles_path = os.path.join(self.shared_folder, 'pdb_pdbqt_log_dir')
+        dir_retFiles_path = os.path.join(self.shared_folder, 'pdbqt_log_dir')
         os.mkdir(dir_retFiles_path)
         
         for filename in out_pdbqt_filename_l + log_filename_l:
-            shutil.copyfile(os.path.join(self.shared_folder, filename), dir_retFiles_path)
+            shutil.copyfile(os.path.join(self.shared_folder, filename), os.path.join(dir_retFiles_path, filename))
 
 
         dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log_out', 'Generated .pdbqt and log files')

@@ -214,7 +214,7 @@ class CompoundSet:
         logging.info('completed prepare_ligand4\nstdout:{}\nstderr:{}\n'.format(stdout, stderr))
 
         if not os.path.exists(pdbqt_file_path):
-            pdbqt_file_path = None
+            pdbqt_file_path = ''
             logging.warning('failed to convert mol2 to pdbqt format')
         else:
             file_size = os.path.getsize(pdbqt_file_path)

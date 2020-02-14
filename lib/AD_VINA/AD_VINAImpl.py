@@ -32,8 +32,8 @@ class AD_VINA:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/n1mus/AD_VINA"
-    GIT_COMMIT_HASH = "0ca1d536cbb7bbc4ef6ef8ea585f5d93c1b48469"
+    GIT_URL = "https://github.com/Tianhao-Gu/AD_VINA.git"
+    GIT_COMMIT_HASH = "0908067c13fef943fd9df6349e7361259f017317"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -51,12 +51,12 @@ class AD_VINA:
         cls.config = config
 
         cls.suffix = '_' + str(uuid.uuid4())
-        
+
         ws = Workspace(self.workspace_url)
         dfu = DataFileUtil(self.callback_url)
         psu = ProteinStructureUtils(self.callback_url)
         csu = CompoundSetUtils(self.callback_url)
-       
+
 
         attr_d = {
             'ws': ws,
@@ -98,10 +98,10 @@ class AD_VINA:
             })
 
         dprint('params', run={**locals(), **globals()})
-        
+
 
         ##
-        ### 
+        ###
         ####
         #####
         ###### param validation
@@ -110,7 +110,7 @@ class AD_VINA:
         ###
         ##
 
- 
+
         ##
         ## flatten params
 
@@ -129,12 +129,12 @@ class AD_VINA:
         intersection = [param in params_all for param in params_search_space]
         if not all(intersection) and any(intersection):
             raise ValueError("If any of search space is entered, all entries (center (x,y,z) and size (x,y,z)) must be specified")
-            
 
-        
+
+
 
         ##
-        ### 
+        ###
         ####
         #####
         ###### dl
@@ -153,7 +153,7 @@ class AD_VINA:
 
 
         ##
-        ### 
+        ###
         ####
         #####
         ###### params, run
@@ -187,9 +187,9 @@ class AD_VINA:
         ##
 
         for ligand_name, ligand_pdbqt_filepath in zip(cs.pdbqt_compound_l, cs.pdbqt_filepath_l):
- 
+
             run_name = ligand_name + '_vs_' + ps.name
-            
+
             out_pdbqt_filename_l.append(run_name + '.pdbqt')
             log_filename_l.append(run_name + '.log')
 
@@ -208,36 +208,36 @@ class AD_VINA:
             for space_coords_name in ['center', 'size']:
                 space_coords = getattr(ps, space_coords_name)
                 for k, v in zip(list('xyz'), space_coords):
-                    params_vina[space_coords_name + '_' + k] = v 
-            
+                    params_vina[space_coords_name + '_' + k] = v
+
             ##
             ## check for input params
 
             for flag in flag_input_l:
                 if params.get(flag):
                     params_vina[flag] = params[flag]
-            
-            
+
+
             ##
             ##
 
             cmd = 'vina'
-            
+
             for param, arg in params_vina.items():
                 cmd += ' --' + param + ' ' + str(arg)
-            
-            
+
+
             _cmd = ( f"vina --receptor {ps.pdbqt_filepath} --ligand {ligand_pdbqt_filepath} "
                      f"--cpu 4 --log {run_name + '.log'} "
                      f"--center_x {ps.center[0]} --center_y {ps.center[1]} --center_z {ps.center[2]} "
                      f"--size_x {ps.size[0]} --size_y {ps.size[1]} --size_z {ps.size[2]} "
                      f"--out {run_name + '.pdbqt'}" )
-            
+
 
             dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
 
         ##
-        ### 
+        ###
         ####
         #####
         ###### return directories
@@ -268,17 +268,17 @@ class AD_VINA:
 
         dir_retFiles_path = os.path.join(self.shared_folder, 'pdbqt_log_dir')
         os.mkdir(dir_retFiles_path)
-        
+
         for filename in out_pdbqt_filename_l + log_filename_l:
             shutil.copyfile(os.path.join(self.shared_folder, filename), os.path.join(dir_retFiles_path, filename))
 
 
         dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log_out', 'Generated .pdbqt and log files')
-    
-        
-  
+
+
+
         ##
-        ### 
+        ###
         ####
         #####
         ###### report
@@ -304,8 +304,8 @@ class AD_VINA:
             'report_ref': report_output['ref'],
         }
 
-      
-        
+
+
         """
 
         (cx, cy, cz)=[float(x) for x in params["center"].split(',')]
@@ -326,6 +326,28 @@ class AD_VINA:
                              'output is not type dict as required.')
         # return the results
         return [output]
+
+    def mol2_to_pdbqt(self, ctx, mol2_file_path, compound_id):
+        """
+        :param mol2_file_path: instance of String
+        :param compound_id: instance of String
+        :returns: instance of String
+        """
+        # ctx is the context object
+        # return variables are: pdbqt_file_path
+        #BEGIN mol2_to_pdbqt
+
+        cs = CompoundSet('', get_file='do_nothing')
+
+        pdbqt_file_path = cs.mol2_to_pdbqt(mol2_file_path, self.shared_folder, compound_id)
+        #END mol2_to_pdbqt
+
+        # At some point might do deeper type checking...
+        if not isinstance(pdbqt_file_path, str):
+            raise ValueError('Method mol2_to_pdbqt return value ' +
+                             'pdbqt_file_path is not type str as required.')
+        # return the results
+        return [pdbqt_file_path]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

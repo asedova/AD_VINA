@@ -6,7 +6,7 @@
 #
 ############################################################
 
-
+from __future__ import print_function
 # the following is a hack to get the baseclient to import whether we're in a
 # package or not. This makes pep8 unhappy hence the annotations.
 try:
@@ -14,7 +14,7 @@ try:
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
 except ImportError:
     # no they aren't
-    from .baseclient import BaseClient as _BaseClient  # @Reimport
+    from baseclient import BaseClient as _BaseClient  # @Reimport
 
 
 class AD_VINA(object):
@@ -42,6 +42,15 @@ class AD_VINA(object):
         """
         return self._client.call_method('AD_VINA.ad_vina',
                                         [params], self._service_ver, context)
+
+    def mol2_to_pdbqt(self, mol2_file_path, compound_id, context=None):
+        """
+        :param mol2_file_path: instance of String
+        :param compound_id: instance of String
+        :returns: instance of String
+        """
+        return self._client.call_method('AD_VINA.mol2_to_pdbqt',
+                                        [mol2_file_path, compound_id], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('AD_VINA.status',

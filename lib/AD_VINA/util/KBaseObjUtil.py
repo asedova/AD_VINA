@@ -216,6 +216,6 @@ class CompoundSet:
         file_size = os.path.getsize(pdbqt_file_path)
 
         if file_size == 0:
-            raise logging.warning('generated empty pdbqt file')
+            logging.warning('generated empty pdbqt file')
 
         return pdbqt_file_path

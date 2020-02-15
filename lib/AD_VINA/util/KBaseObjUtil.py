@@ -167,7 +167,7 @@ class CompoundSet:
                 source = zip_file.open(member)
                 target = open(os.path.join(self.pdbqt_dir, filename), "wb")
                 with source, target:
-                    shutil.copy2(source, target)
+                    shutil.copyfileobj(source, target)
 
         self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
 

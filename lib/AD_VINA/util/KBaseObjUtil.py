@@ -181,11 +181,11 @@ class CompoundSet:
 
         # for each
         # split in splitting dir
-        # copy first model into self.pdbqt_dir
+        # copy first model as pdbqt_filepath
         for pdbqt_filepath in pdbqt_multiple_model_filepath_l:
             pdbqt_filename = os.path.basename(pdbqt_filepath)
 
-            splitting_dir = 'split_' + pdbqt_filename + VarStash.suffix
+            splitting_dir = os.path.join(VarStash.shared_folder, uuid.uuid4())
             os.mkdir(splitting_dir)
 
             cmd = f"vina_split --input {pdbqt_filepath} --ligand 0"
@@ -194,6 +194,8 @@ class CompoundSet:
             keep_filename = sorted(os.listdir(splitting_dir))[0]
             cmd = f"cp {os.path.join(splitting_dir, keep_filename)} {pdbqt_filepath}"
             dprint(cmd, run='cli')
+
+
 
     def mol2_to_pdbqt(self, mol2_file_path, shared_folder, compound_id):
 

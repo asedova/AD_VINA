@@ -215,9 +215,12 @@ class CompoundSet:
 
         logging.info('completed prepare_ligand4\nstdout:{}\nstderr:{}\n'.format(stdout, stderr))
 
-        file_size = os.path.getsize(pdbqt_file_path)
-
-        if file_size == 0:
-            logging.warning('generated empty pdbqt file')
+        if not os.path.exists(pdbqt_file_path):
+            pdbqt_file_path = ''
+            logging.warning('failed to convert mol2 to pdbqt format')
+        else:
+            file_size = os.path.getsize(pdbqt_file_path)
+            if file_size == 0:
+                logging.warning('generated empty pdbqt file')
 
         return pdbqt_file_path

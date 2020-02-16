@@ -50,11 +50,11 @@ class ProteinStructure:
 
         self.pdb_filepath = out_psu_stpf["file_path"]
 
-        pdb_filename = os.path.basename(self.pdb_filepath)
-        if pdb_filename.endswith('.pdb'):
-            self.name = pdb_filename[:-4]
-        else:
-            self.name = pdb_filename
+
+
+
+    def _extract_obj_data(self):
+
 
 
     def calc_center_size(self):
@@ -100,7 +100,8 @@ class CompoundSet:
         self.upa = upa
 
         if get_file == 'load':
-            self.load()
+            self._load()
+            self._extract_obj_data()
         elif get_file == 'do_nothing':
             pass
         else:
@@ -110,7 +111,7 @@ class CompoundSet:
                             level=logging.INFO)
 
     @where_am_i
-    def load(self):
+    def _load(self):
 
         out_csu_fmffz = VarStash.csu.fetch_mol2_files_from_zinc({
             'workspace_id': VarStash.workspace_id,
@@ -118,29 +119,9 @@ class CompoundSet:
             })
 
 
-        compoundset_objData = VarStash.dfu.get_objects({
+        self.objData = VarStash.dfu.get_objects({
             'object_refs': [out_csu_fmffz['compoundset_ref']]
             })['data'][0]['data']
-
-        self.comp_id_l = [compound['id'] for compound in compoundset_objData['compounds']]
-
-
-        ##
-        ## compound names
-
-        self.comp_id_to_name = {compound['id']: compound['name'] for compound in compoundset_objData['compounds']}
-
-
-        ###
-        ### compounds with/without mol2
-
-
-        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in compoundset_objData['compounds']}
-
-        self.comp_id_w_mol2 = [comp_id for comp_id in self.comp_id_l if self.comp_id_to_mol2_handle_ref[comp_id]]
-        self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
-
-        assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
 
         ###
         ### filepaths
@@ -158,6 +139,33 @@ class CompoundSet:
 
         self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
         self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
+
+
+    def _extract_obj_data(self):
+        '''
+        Needs attention
+        '''
+
+        self.comp_id_l = [compound['id'] for compound in self.objData['compounds']]
+
+
+        ##
+        ## compound names
+
+        self.comp_id_to_name = {compound['id']: compound['name'] for compound in self.objData['compounds']}
+
+
+        ###
+        ### compounds with/without mol2
+
+
+        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in self.objData['compounds']}
+
+        self.comp_id_w_mol2 = [comp_id for comp_id in self.comp_id_l if self.comp_id_to_mol2_handle_ref[comp_id]]
+        self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
+
+        assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
+
 
     def split_multiple_models(self):
 

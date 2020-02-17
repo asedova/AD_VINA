@@ -20,7 +20,7 @@
                 "size_y",
                 "size_z"
             ],
-            "optional": true,
+            "optional": false,
             "advanced": true,
             "allow_multiple": false,
             "with_border": false

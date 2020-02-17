@@ -33,9 +33,9 @@ parameters :
         ui-name : |
             Protein structure
         short-hint : |
-            List of protein structures to dock with specified ligands
+            Protein structure to dock with specified ligands
         long-hint  : |
-            List of protein structures to dock with specified ligands
+            Protein structure to dock with specified ligands
     ligand_list_ref :
         ui-name : |
             Ligands to dock
@@ -145,5 +145,8 @@ description : |
 publications :
     -
         display-text: |
-            [1] TBD
-        link: https://www.kbase.us
+            <a href="http://vina.scripps.edu/manual.html">AutoDock Vina Manual</a>
+    -
+        display-text: |
+            <a href="https://www.kbase.us">KBase</a>
+

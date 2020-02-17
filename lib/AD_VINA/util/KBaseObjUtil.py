@@ -4,6 +4,8 @@ import subprocess
 import numpy as np
 import uuid
 import logging
+import zipfile
+import shutil
 from subprocess import Popen, PIPE
 
 from .PrintUtil import *
@@ -153,7 +155,20 @@ class CompoundSet:
 
         dprint('out_csu_ccmftp', run=locals())
 
-        self.pdbqt_dir = os.path.dirname(out_csu_ccmftp['packed_pdbqt_files_path'])
+        packed_pdbqt_files_path = out_csu_ccmftp['packed_pdbqt_files_path']
+        self.pdbqt_dir = os.path.dirname(packed_pdbqt_files_path)
+
+        with zipfile.ZipFile(packed_pdbqt_files_path) as zip_file:
+            for member in zip_file.namelist():
+                filename = os.path.basename(member)
+                if not filename:
+                    continue
+
+                source = zip_file.open(member)
+                target = open(os.path.join(self.pdbqt_dir, filename), "wb")
+                with source, target:
+                    shutil.copyfileobj(source, target)
+
         self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
 
         self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]

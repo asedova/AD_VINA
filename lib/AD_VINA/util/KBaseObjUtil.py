@@ -8,10 +8,6 @@ from subprocess import Popen, PIPE
 
 from .PrintUtil import *
 
-#from installed_clients.WorkspaceClient import Workspace
-#from installed_clients.ProteinStructureUtilsClient import ProteinStructureUtils
-#from installed_clients.CompoundSetUtilsClient import CompoundSetUtils
-
 
 class VarStash:
 
@@ -23,22 +19,29 @@ class VarStash:
 
 
 
-
-
-class ProteinStructure:
+class KBaseObj:
 
     created_instances = []
+    saved_instances = []
+
+
+
+class ProteinStructure(KBaseObj):
+
 
     def __init__(self, upa, get_file='load'):
         self.created_instances.append(self)
         self.upa = upa
 
-        if get_file == 'load': self.load()
-        else: raise NotImplementedError()
+        if get_file == 'load': 
+            self._load()
+            self._get_obj_data()
+        else: 
+            raise NotImplementedError()
 
 
 
-    def load(self):
+    def _load(self):
 
         out_psu_stpf = VarStash.psu.structure_to_pdb_file({
             "input_ref": self.upa,
@@ -53,7 +56,13 @@ class ProteinStructure:
 
 
 
-    def _extract_obj_data(self):
+    def _get_obj_data(self):
+
+        self.objData = VarStash.dfu.get_objects({
+            'object_refs': [self.upa]
+            })['data'][0]['data']
+
+        self.name = self.objData['name']
 
 
 
@@ -80,20 +89,18 @@ class ProteinStructure:
 
     def convert_to_pdbqt(self):
 
-        prepare_receptor4_filepath = '/usr/local/bin/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py'
+        prepare_receptor4_filepath = '/usr/local/lib/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py'
         self.pdbqt_filepath = self.pdb_filepath + 'qt'
 
         cmd = f"python2.5 {prepare_receptor4_filepath} -r {self.pdb_filepath} -o {self.pdbqt_filepath}"
 
-        subprocess.run(cmd)
+        dprint(cmd, run='cli')
 
 
 
+class CompoundSet(KBaseObj):
 
-class CompoundSet:
-
-    created_instances = []
-    AUTODOCKER_UTIL_DIR = '/usr/local/bin/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24'
+    AUTODOCKER_UTIL_DIR = '/usr/local/lib/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24'
 
     def __init__(self, upa, get_file='load'):
         self.created_instances.append(self)
@@ -101,16 +108,13 @@ class CompoundSet:
 
         if get_file == 'load':
             self._load()
-            self._extract_obj_data()
+            self._get_obj_data()
         elif get_file == 'do_nothing':
             pass
         else:
             raise NotImplementedError()
 
-        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
-                            level=logging.INFO)
 
-    @where_am_i
     def _load(self):
 
         out_csu_fmffz = VarStash.csu.fetch_mol2_files_from_zinc({
@@ -128,6 +132,8 @@ class CompoundSet:
 
         dprint('out_csu_fmffz', run=locals())
 
+        
+
         out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
             'input_ref': out_csu_fmffz['compoundset_ref']
             })
@@ -141,7 +147,8 @@ class CompoundSet:
         self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
 
 
-    def _extract_obj_data(self):
+
+    def _get_obj_data(self):
         '''
         Needs attention
         '''

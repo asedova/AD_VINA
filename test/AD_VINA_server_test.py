@@ -98,7 +98,7 @@ class AD_VINATest(unittest.TestCase):
         }
         ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
 
-    def test_mol2_to_pdbqt(self):
+    def _test_mol2_to_pdbqt(self):
 
         mol2_file_path = os.path.join('data', 'cpd00094.mol2')
         compound_id = 'cpd00094'

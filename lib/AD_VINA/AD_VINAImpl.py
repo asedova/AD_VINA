@@ -75,6 +75,10 @@ class AD_VINA:
         dprint("sys.path", "os.environ", run=globals())
         dprint('config', run=locals())
 
+        
+        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
+
         #END_CONSTRUCTOR
         pass
 

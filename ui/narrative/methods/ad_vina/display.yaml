@@ -98,9 +98,6 @@ parameters :
         short-hint : |
             Exhaustiveness of the global search (roughly proportional to time)
         long-hint  : |
-            <p>With the default (or any given) setting of <code>exhaustiveness</code>, the time spent on the search is already varied heuristically depending on the number of atoms, flexibility, etc. 
-            Normally, it does not make sense to spend extra time searching to reduce the probability of not finding the global minimum of the scoring function beyond what is significantly lower than the probability that the minimum is far from the native conformation.
-            However, if you feel that the automatic trade-off made between exhaustiveness and time is inadequate, you can increase the <code>exhaustiveness</code> level. This should increase the time linearly and decrease the probability of not finding the minimum exponentially. </p>
             <p>What does "exhaustiveness" really control, under the hood?</p>
             <p>In the current implementation, the docking calculation consists of a number of independent <i>runs</i>, starting from random conformations.
             Each of these <i>runs</i> consists of a number of sequential <i>steps</i>. Each <i>step</i> involves a random perturbation of the conformation followed
@@ -114,6 +111,10 @@ parameters :
             Unlike in AutoDock 4, in AutoDock Vina, each <i>run</i> can produce several results: 
             promising intermediate results are remembered.
             These are merged, refined, clustered and sorted automatically to produce the final result.</p>
+            <p>With the default (or any given) setting of <code>exhaustiveness</code>, the time spent on the search is already varied heuristically depending on the number of atoms, flexibility, etc. 
+            Normally, it does not make sense to spend extra time searching to reduce the probability of not finding the global minimum of the scoring function beyond what is significantly lower than the probability that the minimum is far from the native conformation.
+            However, if you feel that the automatic trade-off made between exhaustiveness and time is inadequate, you can increase the <code>exhaustiveness</code> level. This should increase the time linearly and decrease the probability of not finding the minimum exponentially. </p>
+
     num_modes :
         ui-name : |
             Number of modes

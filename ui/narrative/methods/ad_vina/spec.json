@@ -183,20 +183,6 @@
                "min_int" : 0,
                "max_int" : 10000
             }
-        },
-        {
-            "id": "dockingscore_name",
-            "optional": false,
-            "advanced": false,
-            "allow_multiple": false,
-            "default_values": [ "" ],
-            "field_type": "text",
-            "text_options": {
-                "is_output_name" : true,
-                "valid_ws_types": [
-                    "KBaseMatrices.DockingScoreMatrix"
-                ]
-            }
         }
     ],
     "behavior": {
@@ -266,11 +252,7 @@
                 {
                     "input_parameter": "exhaustiveness",
                     "target_property": "exhaustiveness"
-                },
-                {
-                    "input_parameter": "dockingscore_name",
-                    "target_property": "dockingscore_name"
-                }
+                }      
             ],
             "output_mapping": [
                 {

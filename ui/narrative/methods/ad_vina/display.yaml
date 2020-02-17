@@ -31,7 +31,7 @@ suggestions:
 parameters :
     pdb_ref :
         ui-name : |
-            Protein structures
+            Protein structure
         short-hint : |
             List of protein structures to dock with specified ligands
         long-hint  : |
@@ -128,13 +128,6 @@ parameters :
             Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
         long-hint  : |
             Maximum energy difference between the best binding mode and the worst one displayed (kcal/mol)
-    dockingscore_name :
-        ui-name : |
-            Output score matrix
-        short-hint : |
-            Supply a name to use for the output score matrix
-        long-hint  : |
-            Supply a name to use for the output score matrix
 
 parameter-groups:
     search_space:

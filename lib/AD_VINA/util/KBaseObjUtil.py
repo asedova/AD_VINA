@@ -4,6 +4,8 @@ import subprocess
 import numpy as np
 import uuid
 import logging
+import zipfile
+import shutil
 from subprocess import Popen, PIPE
 
 from .PrintUtil import *
@@ -19,14 +21,15 @@ class VarStash:
 
 
 
-class KBaseObj:
+class ChemKBaseObj:
 
     created_instances = []
     saved_instances = []
 
+    AUTODOCK_UTIL_DIR = '/usr/local/lib/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24'
 
 
-class ProteinStructure(KBaseObj):
+class ProteinStructure(ChemKBaseObj):
 
 
     def __init__(self, upa, get_file='load'):
@@ -89,7 +92,7 @@ class ProteinStructure(KBaseObj):
 
     def convert_to_pdbqt(self):
 
-        prepare_receptor4_filepath = '/usr/local/lib/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py'
+        prepare_receptor4_filepath = os.path.join(self.AUTODOCK_UTIL_DIR, 'prepare_receptor4.py')
         self.pdbqt_filepath = self.pdb_filepath + 'qt'
 
         cmd = f"python2.5 {prepare_receptor4_filepath} -r {self.pdb_filepath} -o {self.pdbqt_filepath}"
@@ -98,9 +101,8 @@ class ProteinStructure(KBaseObj):
 
 
 
-class CompoundSet(KBaseObj):
+class CompoundSet(ChemKBaseObj):
 
-    AUTODOCKER_UTIL_DIR = '/usr/local/lib/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/AutoDockTools/Utilities24'
 
     def __init__(self, upa, get_file='load'):
         self.created_instances.append(self)
@@ -122,17 +124,14 @@ class CompoundSet(KBaseObj):
             'compoundset_ref': self.upa
             })
 
-
         self.objData = VarStash.dfu.get_objects({
             'object_refs': [out_csu_fmffz['compoundset_ref']]
             })['data'][0]['data']
-
+ 
         ###
         ### filepaths
 
         dprint('out_csu_fmffz', run=locals())
-
-        
 
         out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
             'input_ref': out_csu_fmffz['compoundset_ref']
@@ -140,7 +139,20 @@ class CompoundSet(KBaseObj):
 
         dprint('out_csu_ccmftp', run=locals())
 
-        self.pdbqt_dir = os.path.dirname(out_csu_ccmftp['packed_pdbqt_files_path'])
+        packed_pdbqt_files_path = out_csu_ccmftp['packed_pdbqt_files_path']
+        self.pdbqt_dir = os.path.dirname(packed_pdbqt_files_path)
+
+        with zipfile.ZipFile(packed_pdbqt_files_path) as zip_file:
+            for member in zip_file.namelist():
+                filename = os.path.basename(member)
+                if not filename:
+                    continue
+
+                source = zip_file.open(member)
+                target = open(os.path.join(self.pdbqt_dir, filename), "wb")
+                with source, target:
+                    shutil.copyfileobj(source, target)
+
         self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
 
         self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
@@ -172,6 +184,7 @@ class CompoundSet(KBaseObj):
         self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
 
         assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
+
 
 
     def split_multiple_models(self):
@@ -221,7 +234,7 @@ class CompoundSet(KBaseObj):
 
         pdbqt_file_path = os.path.join(pdbqt_temp_dir, compound_id + '.pdbqt')
 
-        prepare_ligand4_filepath = os.path.join(self.AUTODOCKER_UTIL_DIR, 'prepare_ligand4.py')
+        prepare_ligand4_filepath = os.path.join(self.AUTODOCK_UTIL_DIR, 'prepare_ligand4.py')
 
         command = ['python2.5', prepare_ligand4_filepath, '-l', mol2_file_path, '-o', pdbqt_file_path]
 

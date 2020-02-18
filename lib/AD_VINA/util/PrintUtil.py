@@ -8,7 +8,7 @@ MAX_LINES = 70
 print = functools.partial(print, flush=True)
 subprocess.run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-
+#TODO decouple dprint and drun?
 def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
     print = functools.partial(globals()['print'], **kwargs)
 
@@ -29,8 +29,9 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
     for arg in args:
         if run:
             print('>> ' + arg)
-            if run in ['cli']:
+            if run in ['cli', 'shell']:
                 completed_proc = subprocess.run(arg, **subproc_run_kwargs)
+                retcode = completed_proc.returncode
                 try_json_print(completed_proc.stdout.decode('utf-8'))
                 try_json_print(completed_proc.stderr.decode('utf-8'))
             elif isinstance(run, dict):
@@ -41,6 +42,9 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
             try_json_print(arg)
         print()
     print('--------------------------------------------------------------')
+    # return last retcode
+    if run and run in ['cli', 'shell']:
+        return retcode
 
 
 def where_am_i(f):

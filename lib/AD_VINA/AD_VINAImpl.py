@@ -248,8 +248,13 @@ class AD_VINA:
                      f"--out {run_name + '.pdbqt'}" )
 
 
-            dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
+            retcode = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
 
+            if retcode != 0:
+                raise RuntimeError(
+                    "AutoDock terminated abnormally. "
+                    "Please check logs (click 'Job Status' tab in upper right hand of cell) for AutoDock error message"
+                    )
 
             if params.get('skip_most_vina'):
                 break

@@ -32,8 +32,10 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
             if run in ['cli', 'shell']:
                 completed_proc = subprocess.run(arg, **subproc_run_kwargs)
                 retcode = completed_proc.returncode
-                try_json_print(completed_proc.stdout.decode('utf-8'))
-                try_json_print(completed_proc.stderr.decode('utf-8'))
+                stdout = completed_proc.stdout.decode('utf-8')
+                stderr = completed_proc.stderr.decode('utf-8')
+                try_json_print(stdout)
+                try_json_print(stderr)
             elif isinstance(run, dict):
                 try_json_print(eval(arg, run))
             else:
@@ -42,9 +44,9 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
             try_json_print(arg)
         print()
     print('--------------------------------------------------------------')
-    # return last retcode
+    # return last run
     if run and run in ['cli', 'shell']:
-        return retcode
+        return (retcode, stdout, stderr)
 
 
 def where_am_i(f):

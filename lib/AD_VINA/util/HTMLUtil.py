@@ -21,9 +21,10 @@ class HTMLBuilder:
         #
 
         self.html_dir = os.path.join(VarStash.shared_folder, 'html_dir' + VarStash.suffix)
-        self.html_filepath = os.path.join(self.html_dir, os.path.basename(html_template_filepath))
+        os.mkdir(self.html_dir)
+        self.html_filepath = os.path.join(self.html_dir, os.path.basename(self.html_template_filepath))
         
-        shutil.copyfile(html_template_filepath, self.html_filepath)
+        shutil.copyfile(self.html_template_filepath, self.html_filepath)
 
 
         #
@@ -44,7 +45,7 @@ class HTMLBuilder:
     def _build_protein(self):
         self.replacements['PROTEIN_TAG'] = self.ps.name
 
-    def _build_table():
+    def _build_table(self):
 
 
         col_comp_info = ['Compound', 'Formula', 'ModelSEED ID', 'SMILES', 'Exact Mass', 'Charge', 'mol2 Source']

@@ -89,9 +89,9 @@ parameters :
         ui-name : |
             Seed
         short-hint : |
-            Explicit random seed
+            Explicit random seed (32 bit signed int)
         long-hint : |
-            Explicit random seed
+            Explicit random seed (32 bit signed int)
     exhaustiveness :
         ui-name : |
             Exhaustiveness
@@ -150,3 +150,6 @@ publications :
         display-text: |
             <a href="https://www.kbase.us">KBase</a>
 
+    -
+        display-text: |
+            <a href="http://www3.interscience.wiley.com/journal/122439542/abstract">O. Trott, A. J. Olson, AutoDock Vina: improving the speed and accuracy of docking with a new scoring function, efficient optimization and multithreading, <i>Journal of Computational Chemistry 31 (2010) 455-461</i></a>

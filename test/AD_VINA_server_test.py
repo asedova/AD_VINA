@@ -30,8 +30,15 @@ defaults = {
     'energy_range': 3
     }
 
+defaults_quick = {
+    'exhaustiveness': 1,
+    'num_modes': 2,
+    'energy_range': 3
+    }
 
-
+params_local = {
+    'skip_most_vina' : True
+    }
 
 class AD_VINATest(unittest.TestCase):
 
@@ -41,7 +48,8 @@ class AD_VINATest(unittest.TestCase):
             'ligand_list_ref': test_compound_set,
             'workspace_id': self.wsId,
             'workspace_name': self.wsName,
-            **defaults,
+            **defaults_quick,
+            **params_local,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
 

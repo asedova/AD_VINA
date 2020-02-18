@@ -7,11 +7,7 @@ MAINTAINER KBase Developer
 # installation scripts.
 
 RUN apt-get update
-
-
-
-RUN apt-get install --yes python2.7
-
+RUN pip install --upgrade pip==19.3.1   
 
 
 RUN curl --location  http://vina.scripps.edu/download/autodock_vina_1_1_2_linux_x86.tgz > autodock_vina.tar.gz && \
@@ -31,6 +27,10 @@ cd /usr/local/lib/mgltools_x86_64Linux2_1.5.6 && \
 ./install.sh                                                                                     
 
 ENV PATH="${PATH}:/usr/local/lib/mgltools_x86_64Linux2_1.5.6/bin"
+
+
+
+RUN pip install pandas
 
 # -----------------------------------------
 

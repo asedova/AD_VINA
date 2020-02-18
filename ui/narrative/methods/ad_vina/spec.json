@@ -141,8 +141,8 @@
             "field_type": "text",
             "text_options" : {
                "validate_as" : "int",
-               "min_int" : -2200000000,
-               "max_int" : 22000000000
+               "min_int" : -2147483648,
+               "max_int" : 2147483647
             }
         },
         {

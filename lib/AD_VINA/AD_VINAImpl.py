@@ -102,7 +102,10 @@ class AD_VINA:
             'workspace_id': param_arg_d['workspace_id']
             })
 
-        dprint('params', run={**locals(), **globals()})
+        ctx_censored = ctx.copy()
+        
+
+        dprint('params', 'ctx_censored', run={**locals(), **globals()})
 
 
         ##
@@ -124,10 +127,10 @@ class AD_VINA:
         ##
         ## if search space entered, all entries must be specified
 
-        params_search_space = ['center_' + ch for ch in list('xyz')] + ['size_' + ch for ch in list('xyz')]
-        params_all = list(param_arg_d.keys())
+        keys_search_space = ['center_' + ch for ch in list('xyz')] + ['size_' + ch for ch in list('xyz')]
+        keys_all = list(param_arg_d.keys())
 
-        intersection = [param in params_all for param in params_search_space]
+        intersection = [key in keys_all for key in keys_search_space]
         if not all(intersection) and any(intersection):
             raise ValueError("If any of search space is entered, all entries (center (x,y,z) and size (x,y,z)) must be specified")
 
@@ -181,6 +184,9 @@ class AD_VINA:
 
         for ligand_name, ligand_pdbqt_filepath in zip(cs.pdbqt_compound_l, cs.pdbqt_filepath_l):
 
+            if params.get('skip_vina'):
+                break
+
             run_name = ligand_name + '_vs_' + ps.name
 
             out_pdbqt_filename_l.append(run_name + '.pdbqt')
@@ -230,6 +236,10 @@ class AD_VINA:
             dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
 
 
+            if params.get('skip_most_vina'):
+                break
+
+
 
         ##
         ####
@@ -237,7 +247,7 @@ class AD_VINA:
         ####
         ##
 
-        hb = HTHMLBuilder(ps, cs)
+        hb = HTMLBuilder(ps, cs)
 
 
 
@@ -271,9 +281,13 @@ class AD_VINA:
         dir_retFiles_path = os.path.join(self.shared_folder, 'pdbqt_log_dir')
         os.mkdir(dir_retFiles_path)
 
+
         for filename in out_pdbqt_filename_l + log_filename_l:
             shutil.copyfile(os.path.join(self.shared_folder, filename), os.path.join(dir_retFiles_path, filename))
 
+        # so DataFileUtil doesn't crash over zipping an empty folder
+        if len(os.listdir(dir_retFiles_path)) == 0:
+            dprint(rf"echo 'Sorry, no files were generated' > {os.path.join(dir_retFiles_path, 'README')}", run='cli')
 
         dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log_out', 'Generated .pdbqt and log files')
 

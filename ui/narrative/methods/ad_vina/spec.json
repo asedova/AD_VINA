@@ -3,7 +3,7 @@
     "authors": [
         "suminw, asedova, tgu2"
     ],
-    "contact": "help@kbase.us",
+    "contact": ["help@kbase.us", "sumin.w.wang@gmail.com"],
     "categories": ["active", "structural_genomics"],
     "widgets": {
         "input": null,

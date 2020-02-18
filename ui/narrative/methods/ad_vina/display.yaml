@@ -140,7 +140,7 @@ parameter-groups:
             <p>*Not currently supported</p>
         long-hint: |
             <p>Protein space to explore ligand [and flexible side chain*] positions. The smaller the search space, the easier it is for the docking algorithm to explore it. On the other hand, it will not explore ligand [and flexible side chain*] atom positions outside the search space.</p>
-            <p>Default search space is the entire space of the protein. If the user specifies the center of the search space, the center must be completely specified (all coordinates, x, y, and z, must be entered). If the center of the search space is completely specified, any of the size values (x, y, or z) may be specified, and any unspecified size values will default to 30 Angstroms</p>
+            <p>Default search space is the entire space of the protein, with the <code>size</code> being the difference between the max and min bounds, and the <code>center</code> being the average of those bounds. If the user specifies the center of the search space, the center must be completely specified (all coordinates, x, y, and z, must be entered), and any unspecified size values will default to 30 Angstroms</p>
             <p>*Not currently supported</p>
 description : |
     <p>First test of Autodock Vina protein-ligand docking tool.</p>

@@ -311,8 +311,8 @@ class AD_VINA:
 
         report_params = {
             'message': 'this is the report_params `message`',
-            'warnings': 'this is the report_params `warnings`',
-            'direct_html_link_index': 0, #?
+            'warnings': ['this is the', 'report_params `warnings`'],
+            'direct_html_link_index': 0, #?0
             'html_links': [html_shockInfo],
             'file_links': [dir_retFiles_shockInfo],
             'report_object_name': 'autodock_vina' + self.suffix,

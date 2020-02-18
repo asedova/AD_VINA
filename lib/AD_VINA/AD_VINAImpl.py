@@ -111,6 +111,7 @@ class AD_VINA:
         ##
         ####
         ###### param validation
+        ###### and defaulting
         ####
         ##
 
@@ -126,11 +127,13 @@ class AD_VINA:
 
         if any(center_xyz) and not all(center_xyz):
             raise ValueError(
+                'INPUT ERROR: '
                 'If any of center (i.e., center_x, center_y, center_z) is specified, all of center must be specified. '
                 'Please try again'
                 )
 
 
+        """
         ##
         ## must specify center to specify any of size
 
@@ -139,12 +142,26 @@ class AD_VINA:
 
         if not all(center_xyz) and any(size_xyz):
             raise ValueError(   
+                "INPUT ERROR: "
                 "Must completely specify center (i.e., center_x, center_y, center_z) before specifying any of size (i.e., size_x, size_y, size_z). "
-                "If any of size is unspecified, it will default to 30A. "
+                "(Also, if any of size is unspecified, it will default to 30 Angstroms.) "
                 "Please try again"
                 )
+        """
 
 
+        ##
+        ## if center specified, fill in default size
+
+        size_default = 30 # Angstroms
+
+        key_size_l = ['size_' + ch for ch in list('xyz')]
+        size_xyz = [params_search_space[key] for key in key_size_l]
+
+        if all(center_xyz) and not all(size_xyz):
+            for key_size in key_size_l:
+                if not params_search_space.get(key_size):
+                    params_search_space[key_size] = size_default
 
 
 
@@ -165,7 +182,8 @@ class AD_VINA:
 
         ##
         ####
-        ###### params, run
+        ###### params
+        ###### run
         ####
         ##
 
@@ -191,7 +209,7 @@ class AD_VINA:
 
 
         ##
-        ##
+        ## for each ligand
 
         for ligand_name, ligand_pdbqt_filepath in zip(cs.pdbqt_compound_l, cs.pdbqt_filepath_l):
 
@@ -204,7 +222,7 @@ class AD_VINA:
             log_filename_l.append(run_name + '.log')
 
             ##
-            ## setup default params
+            ## set up default params
 
             params_vina = {
                 'receptor': ps.pdbqt_filepath,
@@ -250,10 +268,13 @@ class AD_VINA:
 
             retcode, stdout, stderr = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
             if retcode != 0:
+                sep = '--------------------------------------------------------------------------'
                 raise RuntimeError(
-                        f"AutoDock terminated abnormally with output: [\n{stdout}\n] "
-                        f"and error message: [\n{stderr}\n]\n"
-                        "You can check logs (click 'Job Status' tab in upper right hand of cell) to confirm"
+                        f"AutoDock terminated abnormally with output:\n"
+                        f"[{sep}\n{stdout}\n{sep}] "
+                        f"and error message:\n"
+                        f"[{sep}\n{stderr}\n{sep}]\n"
+                        "You can check logs (click 'Job Status' tab in upper right of cell) to confirm"
                         )
 
             if params.get('skip_most_vina'):
@@ -318,7 +339,7 @@ class AD_VINA:
 
         # html
 
-        html_shockInfo = dir_to_shock(hb.html_dir, 'index.html', 'HTML report from AutoDock Vina')
+        html_shockInfo = dir_to_shock(hb.html_dir, 'index.html', 'HTML report for AutoDock Vina')
             
 
 
@@ -348,17 +369,6 @@ class AD_VINA:
 
 
 
-        """
-
-        (cx, cy, cz)=[float(x) for x in params["center"].split(',')]
-        (sx, sy, sz)=[float(x) for x in params["size"].split(',')]
-        cmd = "vina --receptor %s --ligand %s --cpu 4 --center_x %f --center_y %f  --center_z %f --size_x %f --size_y %f --size_z %f --out %s" % (params["receptor"], params["ligand"], cx, cy, cz, sx, sy, sz, params["outname"])
-        print((cmd+"\n"))
-        os.system(cmd)
-        output = {}
-        print(cmd)
-
-        """
         #END ad_vina
 
         # At some point might do deeper type checking...

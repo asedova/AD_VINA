@@ -179,6 +179,9 @@ class AD_VINA:
         cs = CompoundSet(params['ligand_list_ref'])
         cs.split_multiple_models()
 
+        dprint(ChemKBaseObj.created_instances)
+
+
 
         ##
         ####
@@ -188,7 +191,6 @@ class AD_VINA:
         ##
 
 
-        ##
         ##
 
         params_static = {
@@ -201,8 +203,12 @@ class AD_VINA:
             'exhaustiveness': 20,
             }
 
+        ##
+
         key_search_space_l = key_center_l + key_size_l
         key_misc_l = ['num_modes', 'energy_range', 'seed', 'exhaustiveness']
+
+        ##
 
         out_pdbqt_filename_l = []
         log_filename_l = []
@@ -239,7 +245,7 @@ class AD_VINA:
                     params_vina[space_coords_name + '_' + k] = v
 
             ##
-            ## check for input params
+            ## check for search_space and misc params
 
             for key in key_misc_l:
                 if params.get(key):
@@ -258,23 +264,21 @@ class AD_VINA:
             for param, arg in params_vina.items():
                 cmd += ' --' + param + ' ' + str(arg)
 
-
+            """
             _cmd = ( f"vina --receptor {ps.pdbqt_filepath} --ligand {ligand_pdbqt_filepath} "
                      f"--cpu 4 --log {run_name + '.log'} "
                      f"--center_x {ps.center[0]} --center_y {ps.center[1]} --center_z {ps.center[2]} "
                      f"--size_x {ps.size[0]} --size_y {ps.size[1]} --size_z {ps.size[2]} "
                      f"--out {run_name + '.pdbqt'}" )
-
+            """
 
             retcode, stdout, stderr = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
             if retcode != 0:
                 sep = '--------------------------------------------------------------------------'
                 raise RuntimeError(
-                        f"AutoDock terminated abnormally with output:\n"
-                        f"[{sep}\n{stdout}\n{sep}] "
-                        f"and error message:\n"
-                        f"[{sep}\n{stderr}\n{sep}]\n"
-                        "You can check logs (click 'Job Status' tab in upper right of cell) to confirm"
+                        f"AutoDock terminated abnormally with error message: "
+                        f"[{stderr}] "
+                        "You can check logs (click 'Job Status' tab in upper right of cell) for more information"
                         )
 
             if params.get('skip_most_vina'):

@@ -40,6 +40,9 @@ params_local = {
     'skip_most_vina' : True
     }
 
+defaults_search_space = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
+
+
 class AD_VINATest(unittest.TestCase):
 
     def test(self):
@@ -48,6 +51,7 @@ class AD_VINATest(unittest.TestCase):
             'ligand_list_ref': test_compound_set,
             'workspace_id': self.wsId,
             'workspace_name': self.wsName,
+            'search_space': defaults_search_space,
             **defaults_quick,
             **params_local,
             }

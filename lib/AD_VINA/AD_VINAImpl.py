@@ -95,18 +95,17 @@ class AD_VINA:
         # return variables are: output
         #BEGIN ad_vina
 
-        param_arg_d = params
 
         VarStash.update({
             'ctx': ctx,
-            'workspace_id': param_arg_d['workspace_id']
+            'workspace_id': params['workspace_id']
             })
 
         ctx_censored = ctx.copy()
         ctx_censored.pop('token')
         
 
-        dprint('params', 'ctx_censored', run={**locals(), **globals()})
+        dprint('params', 'ctx_censored', run=locals())
 
 
         ##
@@ -116,24 +115,35 @@ class AD_VINA:
         ##
 
 
-        ##
-        ## flatten params
-
-        if param_arg_d.get('search_space'):
-            for param, arg in param_arg_d['search_space'].items():
-                param_arg_d[param] = arg
-            param_arg_d.pop('search_space')
+        params_search_space = params['search_space']
 
 
         ##
-        ## if search space entered, all entries must be specified
+        ## if center specified, must be completely specified
 
-        keys_search_space = ['center_' + ch for ch in list('xyz')] + ['size_' + ch for ch in list('xyz')]
-        keys_all = list(param_arg_d.keys())
+        key_center_l = ['center_' + ch for ch in list('xyz')]
+        center_xyz = [params_search_space[key] for key in key_center_l]
 
-        intersection = [key in keys_all for key in keys_search_space]
-        if not all(intersection) and any(intersection):
-            raise ValueError("If any of search space is entered, all entries (center (x,y,z) and size (x,y,z)) must be specified")
+        if any(center_xyz) and not all(center_xyz):
+            raise ValueError(
+                'If any of center (i.e., center_x, center_y, center_z) is specified, all of center must be specified. '
+                'Please try again'
+                )
+
+
+        ##
+        ## must specify center to specify any of size
+
+        key_size_l = ['size_' + ch for ch in list('xyz')]
+        size_xyz = [params_search_space[key] for key in key_size_l]
+
+        if not all(center_xyz) and any(size_xyz):
+            raise ValueError(   
+                "Must completely specify center (i.e., center_x, center_y, center_z) before specifying any of size (i.e., size_x, size_y, size_z). "
+                "If any of size is unspecified, it will default to 30A. "
+                "Please try again"
+                )
+
 
 
 
@@ -145,11 +155,11 @@ class AD_VINA:
         ##
 
 
-        ps = ProteinStructure(param_arg_d['pdb_ref'])
+        ps = ProteinStructure(params['pdb_ref'])
         ps.calc_center_size()
         ps.convert_to_pdbqt()
 
-        cs = CompoundSet(param_arg_d['ligand_list_ref'])
+        cs = CompoundSet(params['ligand_list_ref'])
         cs.split_multiple_models()
 
 
@@ -173,8 +183,8 @@ class AD_VINA:
             'exhaustiveness': 20,
             }
 
-        flag_input_l = ['center_x', 'center_y', 'center_z', 'size_x', 'size_y', 'size_z',
-            'num_modes', 'energy_range', 'seed', 'exhaustiveness']
+        key_search_space_l = key_center_l + key_size_l
+        key_misc_l = ['num_modes', 'energy_range', 'seed', 'exhaustiveness']
 
         out_pdbqt_filename_l = []
         log_filename_l = []
@@ -213,9 +223,13 @@ class AD_VINA:
             ##
             ## check for input params
 
-            for flag in flag_input_l:
-                if params.get(flag):
-                    params_vina[flag] = params[flag]
+            for key in key_misc_l:
+                if params.get(key):
+                    params_vina[key] = params[key]
+
+            for key in key_search_space_l:
+                if params_search_space.get(key):
+                    params_vina[key] = params_search_space[key]
 
 
             ##

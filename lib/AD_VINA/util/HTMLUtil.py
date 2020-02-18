@@ -9,7 +9,7 @@ from .KBaseObjUtil import *
 
 class HTMLBuilder:
 
-    html_filepath = '/kb/module/lib/AD_VINA/util/index.html'
+    html_template_filepath = '/kb/module/lib/AD_VINA/util/index.html'
     TAGS = [tag + '_TAG' for tag in ['PROTEIN', 'WARNINGS', 'CMDS', 'JSON', 'COLUMNS']]
     
 
@@ -17,6 +17,17 @@ class HTMLBuilder:
         self.ps = ps
         self.cs = cs
     
+
+        #
+
+        self.html_dir = os.path.join(VarStash.shared_folder, 'html_dir' + VarStash.suffix)
+        self.html_filepath = os.path.join(self.html_dir, os.path.basename(html_template_filepath))
+        
+        shutil.copyfile(html_template_filepath, self.html_filepath)
+
+
+        #
+
         self.replacements = {}
 
         self._build()

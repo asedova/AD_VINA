@@ -11,6 +11,7 @@ from installed_clients.DataFileUtilClient import DataFileUtil
 
 from .util.KBaseObjUtil import *
 from .util.PrintUtil import *
+from .util.HTMLUtil import *
 
 
 #END_HEADER
@@ -105,13 +106,9 @@ class AD_VINA:
 
 
         ##
-        ###
         ####
-        #####
         ###### param validation
-        #####
         ####
-        ###
         ##
 
 
@@ -138,13 +135,9 @@ class AD_VINA:
 
 
         ##
-        ###
         ####
-        #####
         ###### dl
-        #####
         ####
-        ###
         ##
 
 
@@ -157,13 +150,9 @@ class AD_VINA:
 
 
         ##
-        ###
         ####
-        #####
         ###### params, run
-        #####
         ####
-        ###
         ##
 
 
@@ -240,14 +229,22 @@ class AD_VINA:
 
             dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
 
+
+
         ##
-        ###
         ####
-        #####
+        ###### html
+        ####
+        ##
+
+        hb = HTHMLBuilder(ps, cs)
+
+
+
+        ##
+        ####
         ###### return directories
-        #####
         ####
-        ###
         ##
 
 
@@ -269,6 +266,7 @@ class AD_VINA:
 
             return dir_shockInfo
 
+        # return files
 
         dir_retFiles_path = os.path.join(self.shared_folder, 'pdbqt_log_dir')
         os.mkdir(dir_retFiles_path)
@@ -281,20 +279,22 @@ class AD_VINA:
 
 
 
+        # html
+
+        html_shockInfo = dir_to_shock(hb.html_dir, 'HTML report', 'HTML report from AutoDock Vina')
+            
+
+
         ##
-        ###
         ####
-        #####
         ###### report
-        #####
         ####
-        ###
         ##
 
         report_params = {
             'message': 'this is the report_params `message`',
             'direct_html_link_index': 0, #?
-            'html_links': [],
+            'html_links': [html_shockInfo],
             'file_links': [dir_retFiles_shockInfo],
             'report_object_name': 'autodock_vina' + self.suffix,
             'workspace_name': params['workspace_name'],
@@ -321,7 +321,6 @@ class AD_VINA:
         print(cmd)
 
         """
-        return None
         #END ad_vina
 
         # At some point might do deeper type checking...

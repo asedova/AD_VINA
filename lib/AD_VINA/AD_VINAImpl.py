@@ -179,7 +179,6 @@ class AD_VINA:
         cs = CompoundSet(params['ligand_list_ref'])
         cs.split_multiple_models()
 
-        dprint(ChemKBaseObj.created_instances)
 
 
 

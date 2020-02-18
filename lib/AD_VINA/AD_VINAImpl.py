@@ -262,6 +262,9 @@ class AD_VINA:
         def dir_to_shock(dir_path, name, description):
             '''
             For regular directories or html directories
+            
+            name - for regular directories: the name of the flat file returned to ui
+                   for html directories: the name of the html file
             '''
             dfu_fileToShock_ret = VarStash.dfu.file_to_shock({
                 'file_path': dir_path,
@@ -290,13 +293,13 @@ class AD_VINA:
         if len(os.listdir(dir_retFiles_path)) == 0:
             dprint(rf"echo 'Sorry, no files were generated' > {os.path.join(dir_retFiles_path, 'README')}", run='cli')
 
-        dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log_out', 'Generated .pdbqt and log files')
+        dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log.zip', 'Generated .pdbqt and log files')
 
 
 
         # html
 
-        html_shockInfo = dir_to_shock(hb.html_dir, 'HTML report', 'HTML report from AutoDock Vina')
+        html_shockInfo = dir_to_shock(hb.html_dir, 'index.html', 'HTML report from AutoDock Vina')
             
 
 
@@ -308,6 +311,7 @@ class AD_VINA:
 
         report_params = {
             'message': 'this is the report_params `message`',
+            'warnings': 'this is the report_params `warnings`',
             'direct_html_link_index': 0, #?
             'html_links': [html_shockInfo],
             'file_links': [dir_retFiles_shockInfo],

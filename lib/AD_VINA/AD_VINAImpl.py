@@ -103,6 +103,7 @@ class AD_VINA:
             })
 
         ctx_censored = ctx.copy()
+        ctx_censored.pop('token')
         
 
         dprint('params', 'ctx_censored', run={**locals(), **globals()})

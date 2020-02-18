@@ -214,30 +214,6 @@
                     "target_property": "search_space"
                 },
                 {
-                    "input_parameter": "center_x",
-                    "target_property": "center_x"
-                },
-                {
-                    "input_parameter": "center_y",
-                    "target_property": "center_y"
-                },
-                {
-                    "input_parameter": "center_z",
-                    "target_property": "center_z"
-                },
-                {
-                    "input_parameter": "size_x",
-                    "target_property": "size_x"
-                },
-                {
-                    "input_parameter": "size_y",
-                    "target_property": "size_y"
-                },
-                {
-                    "input_parameter": "size_z",
-                    "target_property": "size_z"
-                },
-                {
                     "input_parameter": "num_modes",
                     "target_property": "num_modes"
                 },

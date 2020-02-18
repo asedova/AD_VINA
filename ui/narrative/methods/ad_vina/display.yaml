@@ -33,9 +33,9 @@ parameters :
         ui-name : |
             Protein structure
         short-hint : |
-            Protein structure to dock with specified ligands
+            Protein structure to dock with specified ligands. 
         long-hint  : |
-            Protein structure to dock with specified ligands
+            Protein structure to dock with specified ligands. Structures must be thoroughly cleaned prior to processing with ADTools
     ligand_list_ref :
         ui-name : |
             Ligands to dock

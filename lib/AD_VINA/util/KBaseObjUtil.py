@@ -73,15 +73,15 @@ class ProteinStructure(ChemKBaseObj):
 
     def _load(self):
 
-        out_psu_stpf = VarStash.psu.structure_to_pdb_file({
+        out_psu_s2pf = VarStash.psu.structure_to_pdb_file({
             "input_ref": self.upa,
             "destination_dir": VarStash.shared_folder
             }
         )
 
-        dprint('out_psu_stpf', run=locals())
+        dprint('out_psu_s2pf', run=locals())
 
-        self.pdb_filepath = out_psu_stpf["file_path"]
+        self.pdb_filepath = out_psu_s2pf["file_path"]
 
 
 
@@ -93,6 +93,9 @@ class ProteinStructure(ChemKBaseObj):
             })['data'][0]['data']
 
         self.name = self.objData['name']
+        if self.name.endswith('.pdb'): self.name = self.name[:-4]
+
+        self.sequence = self.objData['protein']['sequence']
 
 
 
@@ -110,6 +113,7 @@ class ProteinStructure(ChemKBaseObj):
                 min_l[coords < min_l] = coords[coords < min_l]
                 max_l[coords > max_l] = coords[coords > max_l]
 
+        dprint('min_l', 'max_l', run=locals())
 
         self.center = (min_l + max_l) / 2
         self.size = max_l - min_l
@@ -168,20 +172,21 @@ class CompoundSet(ChemKBaseObj):
             'compoundset_ref': self.upa
             })
 
+        dprint('out_csu_fmffz', run=locals())
+
         self.objData = VarStash.dfu.get_objects({
             'object_refs': [out_csu_fmffz['compoundset_ref']]
             })['data'][0]['data']
- 
-        ###
-        ### filepaths
-
-        dprint('out_csu_fmffz', run=locals())
 
         out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
             'input_ref': out_csu_fmffz['compoundset_ref']
             })
 
         dprint('out_csu_ccmftp', run=locals())
+ 
+
+        ##
+        ## .pdbqt filepaths
 
         packed_pdbqt_files_path = out_csu_ccmftp['packed_pdbqt_files_path']
         self.pdbqt_dir = os.path.dirname(packed_pdbqt_files_path)
@@ -196,6 +201,9 @@ class CompoundSet(ChemKBaseObj):
                 target = open(os.path.join(self.pdbqt_dir, filename), "wb")
                 with source, target:
                     shutil.copyfileobj(source, target)
+
+        ##
+        ##
 
         self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
 
@@ -268,6 +276,15 @@ class CompoundSet(ChemKBaseObj):
             dprint(cmd, run='cli')
 
 
+
+
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
     def mol2_to_pdbqt(self, mol2_file_path, shared_folder, compound_id):
 

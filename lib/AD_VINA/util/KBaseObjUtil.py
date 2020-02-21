@@ -1,11 +1,13 @@
 import tarfile
 import os
 import subprocess
+import pandas as pd
 import numpy as np
 import uuid
 import logging
 import zipfile
 import shutil
+import json
 from subprocess import Popen, PIPE
 
 from .PrintUtil import *
@@ -65,10 +67,12 @@ class ProteinStructure(ChemKBaseObj):
 
         if get_file == 'load': 
             self._load()
-            self._get_obj_data()
+        if get_file == 'from_cache':
+            self._from_cache()
         else: 
             raise NotImplementedError()
 
+        self._get_obj_data()
 
 
     def _load(self):
@@ -83,6 +87,10 @@ class ProteinStructure(ChemKBaseObj):
 
         self.pdb_filepath = out_psu_s2pf["file_path"]
 
+
+
+    def _from_cache(self):
+        self.pdb_filepath = '/kb/module/test/data/3dnf_clean.pdb'
 
 
 
@@ -157,16 +165,21 @@ class CompoundSet(ChemKBaseObj):
         self.upa = upa
 
         if get_file == 'load':
-            self._load()
-            self._get_obj_data()
+            self._fetch_mol2()
+            self._convert_to_pdbqt()
+        elif get_file == 'from_cache':
+            self._from_cache()
         elif get_file == 'do_nothing':
-            pass
+            return
         else:
             raise NotImplementedError()
 
+        self._get_obj_data()
+        self._to_data_frame()
 
-    def _load(self):
 
+
+    def _fetch_mol2(self):
         out_csu_fmffz = VarStash.csu.fetch_mol2_files_from_zinc({
             'workspace_id': VarStash.workspace_id,
             'compoundset_ref': self.upa
@@ -174,21 +187,27 @@ class CompoundSet(ChemKBaseObj):
 
         dprint('out_csu_fmffz', run=locals())
 
-        self.objData = VarStash.dfu.get_objects({
-            'object_refs': [out_csu_fmffz['compoundset_ref']]
-            })['data'][0]['data']
+        self.upa_old = self.upa
+        self.upa = out_csu_fmffz['compoundset_ref']
 
-        out_csu_ccmftp = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
-            'input_ref': out_csu_fmffz['compoundset_ref']
+
+
+    def _convert_to_pdbqt(self):
+
+        ##
+        ## convert
+
+        out_csu_ccmt2p = VarStash.csu.convert_compoundset_mol2_files_to_pdbqt({
+            'input_ref': self.upa
             })
 
-        dprint('out_csu_ccmftp', run=locals())
+        dprint('out_csu_ccmt2p', run=locals())
  
 
         ##
-        ## .pdbqt filepaths
+        ## filepaths
 
-        packed_pdbqt_files_path = out_csu_ccmftp['packed_pdbqt_files_path']
+        packed_pdbqt_files_path = out_csu_ccmt2p['packed_pdbqt_files_path']
         self.pdbqt_dir = os.path.dirname(packed_pdbqt_files_path)
 
         with zipfile.ZipFile(packed_pdbqt_files_path) as zip_file:
@@ -202,40 +221,99 @@ class CompoundSet(ChemKBaseObj):
                 with source, target:
                     shutil.copyfileobj(source, target)
 
-        ##
-        ##
 
-        self.comp_id_to_pdbqtFileName_d = out_csu_ccmftp['comp_id_pdbqt_file_name_map']
+        self.id_to_pdbqt_filepath_d = {id: os.path.join(self.pdbqt_dir, filename) 
+                for id, filename in out_csu_ccmt2p['comp_id_pdbqt_file_name_map'].items()}
 
-        self.pdbqt_filepath_l = [os.path.join(self.pdbqt_dir, filename) for filename in self.comp_id_to_pdbqtFileName_d.values()]
-        self.pdbqt_compound_l = [compound for compound in self.comp_id_to_pdbqtFileName_d.keys()]
+
+
+    def _from_cache(self):
+        '''
+        This skips the fetching mol2 from zinc (and conversion) step ,
+        so the objData *may* be from a CompoundSet with no mol2 files
+        '''
+
+        self.pdbqt_dir = '/kb/module/test/data/compound_pdbqt'
+
+        with open('/kb/module/test/data/id_to_pdbqt') as f:
+            d = f.read()
+        d = json.loads(d)
+        
+        self.id_to_pdbqt_filepath_d = {id: os.path.join(self.pdbqt_dir, f) for id, f in d.items()}
+       
+        dprint('self.id_to_pdbqt_filepath_d', run=locals())
 
 
 
     def _get_obj_data(self):
-        '''
-        Needs attention
-        '''
+        self.objData = VarStash.dfu.get_objects({
+            'object_refs': [self.upa]
+            })['data'][0]['data']
 
-        self.comp_id_l = [compound['id'] for compound in self.objData['compounds']]
+
+
+    def _to_data_frame(self):
+
+        objData_compound_l = self.objData['compounds']
+        attr_l = ['smiles', 'inchikey', 'name', 'charge', 'mass', 'mol2_source', 'deltag', 'formula', 'id'] # id is actually user-entered
+
+        df = pd.DataFrame(columns=attr_l)
+
+        ##
+        ## objData
+        for objData_compound in objData_compound_l:
+            df.loc[len(df)] = [objData_compound.get(key) for key in attr_l]
+
+        ##
+        ## pdbqt filepath
+        id_l = list(self.id_to_pdbqt_filepath_d.keys())
+        pdbqt_filepath_l = list(self.id_to_pdbqt_filepath_d.values())
+
+        df.set_index('id', inplace=True)
+        df.loc[id_l, 'pdbqt_filepath'] = pdbqt_filepath_l
 
 
         ##
-        ## compound names
+        ## ModelSEED id
+        inchikey_2_cpd_filepath = '/kb/module/data/Inchikey_IDs.json'
+        with open(inchikey_2_cpd_filepath) as fp:
+            d = json.load(fp)
 
-        self.comp_id_to_name = {compound['id']: compound['name'] for compound in self.objData['compounds']}
+        df['cpd'] = [d.get(inchikey) if d.get(inchikey) else np.nan for inchikey in df['inchikey']]
+        df['modelseed_link'] = [f'<a href="modelseed.org/biochem/compounds/{cpd_id}">{cpd_id}</a>' if not(isinstance(cpd_id, float) and np.isnan(cpd_id)) else np.nan for cpd_id in df['cpd']]
 
 
-        ###
-        ### compounds with/without mol2
+        dprint('df', run=locals())
+
+        self.df = df
 
 
-        self.comp_id_to_mol2_handle_ref = {compound['id']: compound.get('mol2_handle_ref') for compound in self.objData['compounds']}
 
-        self.comp_id_w_mol2 = [comp_id for comp_id in self.comp_id_l if self.comp_id_to_mol2_handle_ref[comp_id]]
-        self.comp_id_wo_mol2 = [comp_id for comp_id in self.comp_id_l if comp_id not in self.comp_id_w_mol2]
 
-        assert sorted(self.comp_id_w_mol2 + self.comp_id_wo_mol2) == sorted(self.comp_id_l)
+    #def update_data_frame(self, col_name: str, col: list):
+    #    self.df[col_name] = col
+
+
+
+    def get_attr_l(self, attr: str, rm_nan=False):
+        '''
+        If get attributes from here,
+        convenient and preserves order
+        '''
+        if attr not in self.df.columns and attr != self.df.index.name:
+            raise ValueError('CompoundSet.get_attr_l: attr not in column or index names')
+
+        if attr in self.df.columns:
+            l = self.df[attr].tolist()
+        elif attr == self.df.index.name:
+            l = self.df.index.tolist()
+        else:
+            raise Exception()
+
+        if rm_nan:
+            l = [e for e in l if not (isinstance(e, float) and np.isnan(e))]
+
+        return l
 
 
 
@@ -245,7 +323,7 @@ class CompoundSet(ChemKBaseObj):
 
         # find multiple models
 
-        for filepath in self.pdbqt_filepath_l:
+        for filepath in self.get_attr_l('pdbqt_filepath', rm_nan=True):
             with open(filepath) as f:
                 for line in f:
                     if line.strip() == '':

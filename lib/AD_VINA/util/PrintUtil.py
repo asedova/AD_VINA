@@ -3,12 +3,14 @@ import pprint, json
 import subprocess
 import sys
 import os
+import time
 
 MAX_LINES = 70
 print = functools.partial(print, flush=True)
 subprocess.run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
 #TODO decouple dprint and drun?
+#TODO time
 def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
     print = functools.partial(globals()['print'], **kwargs)
 

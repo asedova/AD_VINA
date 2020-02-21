@@ -31,13 +31,14 @@ defaults = {
     }
 
 defaults_quick = {
-    'exhaustiveness': 1,
-    'num_modes': 2,
+    'exhaustiveness': 2,
+    'num_modes': 3,
     'energy_range': 3
     }
 
 params_local = {
-    'skip_most_vina' : True
+    'skip_dl': True,
+    #'skip_most_vina' : True,
     }
 
 defaults_search_space = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
@@ -52,7 +53,7 @@ class AD_VINATest(unittest.TestCase):
             'workspace_id': self.wsId,
             'workspace_name': self.wsName,
             'search_space': defaults_search_space,
-            **defaults_quick,
+            **defaults,
             **params_local,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)

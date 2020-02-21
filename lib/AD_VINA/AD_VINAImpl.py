@@ -33,8 +33,8 @@ class AD_VINA:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/Tianhao-Gu/AD_VINA.git"
-    GIT_COMMIT_HASH = "0908067c13fef943fd9df6349e7361259f017317"
+    GIT_URL = "https://github.com/n1mus/AD_VINA"
+    GIT_COMMIT_HASH = "c513e24f86458708db620ccf91492623e1aa2b8a"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -58,6 +58,7 @@ class AD_VINA:
         psu = ProteinStructureUtils(self.callback_url)
         csu = CompoundSetUtils(self.callback_url)
 
+        warnings = []
 
         attr_d = {
             'ws': ws,
@@ -68,7 +69,8 @@ class AD_VINA:
             'workspace_url': cls.workspace_url,
             'shared_folder': cls.shared_folder,
             'testData_dir': cls.testData_dir,
-            'suffix': cls.suffix
+            'suffix': cls.suffix,
+            'warnings': warnings
             }
 
         VarStash.update(attr_d)
@@ -171,12 +173,13 @@ class AD_VINA:
         ####
         ##
 
+        get_file = 'from_cache' if params.get('skip_dl') else 'load'
 
-        ps = ProteinStructure(params['pdb_ref'])
+        ps = ProteinStructure(params['pdb_ref'], get_file=get_file)
         ps.calc_center_size()
         ps.convert_to_pdbqt()
 
-        cs = CompoundSet(params['ligand_list_ref'])
+        cs = CompoundSet(params['ligand_list_ref'], get_file=get_file)
         cs.split_multiple_models()
 
 
@@ -188,6 +191,9 @@ class AD_VINA:
         ###### run
         ####
         ##
+
+        run_dir = os.path.join(VarStash.shared_folder, 'vina' + VarStash.suffix)
+        os.mkdir(run_dir)
 
 
         ##
@@ -207,21 +213,29 @@ class AD_VINA:
         key_search_space_l = key_center_l + key_size_l
         key_misc_l = ['num_modes', 'energy_range', 'seed', 'exhaustiveness']
 
-        ##
 
+        ## collectables
+
+        id_l = []
         out_pdbqt_filename_l = []
         log_filename_l = []
+        cmd_l = []
 
 
         ##
-        ## for each ligand
+        ## for each compound
 
-        for ligand_name, ligand_pdbqt_filepath in zip(cs.pdbqt_compound_l, cs.pdbqt_filepath_l):
+        for id, pdbqt_filepath in zip(cs.get_attr_l('id'), cs.get_attr_l('pdbqt_filepath')):
 
             if params.get('skip_vina'):
                 break
 
-            run_name = ligand_name + '_vs_' + ps.name
+            if isinstance(pdbqt_filepath, float) and np.isnan(pdbqt_filepath): # no mol2 -> no pdbqt -> skip
+                continue
+            else:
+                id_l.append(id)
+
+            run_name = f'compoundID[' + id.replace('/', '-') + ']_vs_protein[' + ps.name + ']'
 
             out_pdbqt_filename_l.append(run_name + '.pdbqt')
             log_filename_l.append(run_name + '.log')
@@ -231,7 +245,7 @@ class AD_VINA:
 
             params_vina = {
                 'receptor': ps.pdbqt_filepath,
-                'ligand': ligand_pdbqt_filepath,
+                'ligand': pdbqt_filepath,
                 'log': run_name + '.log',
                 'out': run_name + '.pdbqt',
                 **params_static,
@@ -263,17 +277,9 @@ class AD_VINA:
             for param, arg in params_vina.items():
                 cmd += ' --' + param + ' ' + str(arg)
 
-            """
-            _cmd = ( f"vina --receptor {ps.pdbqt_filepath} --ligand {ligand_pdbqt_filepath} "
-                     f"--cpu 4 --log {run_name + '.log'} "
-                     f"--center_x {ps.center[0]} --center_y {ps.center[1]} --center_z {ps.center[2]} "
-                     f"--size_x {ps.size[0]} --size_y {ps.size[1]} --size_z {ps.size[2]} "
-                     f"--out {run_name + '.pdbqt'}" )
-            """
-
-            retcode, stdout, stderr = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': VarStash.shared_folder})
+            retcode, stdout, stderr = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': run_dir})
+            
             if retcode != 0:
-                sep = '--------------------------------------------------------------------------'
                 raise RuntimeError(
                         f"AutoDock terminated abnormally with error message: "
                         f"[{stderr}] "
@@ -283,7 +289,11 @@ class AD_VINA:
             if params.get('skip_most_vina'):
                 break
 
+        log_filepath_l = [os.path.join(run_dir, f) for f in log_filename_l]
+        cs.df.loc[id_l, 'log_filepath'] = log_filepath_l
 
+
+        dprint('cs.df', run=locals())
 
         ##
         ####
@@ -291,7 +301,7 @@ class AD_VINA:
         ####
         ##
 
-        hb = HTMLBuilder(ps, cs)
+        hb = HTMLBuilder(ps, cs, cmd_l)
 
 
 
@@ -306,7 +316,7 @@ class AD_VINA:
             '''
             For regular directories or html directories
             
-            name - for regular directories: the name of the flat file returned to ui
+            name - for regular directories: the name of the flat (zip) file returned to ui
                    for html directories: the name of the html file
             '''
             dfu_fileToShock_ret = VarStash.dfu.file_to_shock({
@@ -330,7 +340,7 @@ class AD_VINA:
 
 
         for filename in out_pdbqt_filename_l + log_filename_l:
-            shutil.copyfile(os.path.join(self.shared_folder, filename), os.path.join(dir_retFiles_path, filename))
+            shutil.copyfile(os.path.join(run_dir, filename), os.path.join(dir_retFiles_path, filename))
 
         # so DataFileUtil doesn't crash over zipping an empty folder
         if len(os.listdir(dir_retFiles_path)) == 0:
@@ -354,8 +364,8 @@ class AD_VINA:
 
         report_params = {
             'message': 'this is the report_params `message`',
-            'warnings': ['this is the', 'report_params `warnings`'],
-            'direct_html_link_index': 0, #?0
+            'warnings': VarStash.warnings,
+            'direct_html_link_index': 0,
             'html_links': [html_shockInfo],
             'file_links': [dir_retFiles_shockInfo],
             'report_object_name': 'autodock_vina' + self.suffix,

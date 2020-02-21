@@ -71,11 +71,12 @@ class HTMLBuilder:
 
     def _build_cmds(self):
         if len(self.cmd_l) > 0:
-            self.replacements['CMDS_TAG'] = '\n'.join([f"<code>{cmd}</code>" for cmd in self.cmd_l])
+            self.replacements['CMDS_TAG'] = '\n'.join([f"<p><code>{cmd}</code></p>" for cmd in self.cmd_l])
         else:
             self.replacements['CMDS_TAG'] = (
                 "<p><i>No <code>vina</code> commands were run. "
                 "This could be because no MOL2 files were found in ZINC for any of the compounds, "
+                "no MOL2 files successfully converted to PDBQT, "
                 "or there are no compounds in the CompoundSet object.</i></p>"
                 )
 
@@ -174,7 +175,7 @@ class HTMLBuilder:
                     seed = line[19:-1]
                  
         if end == start + i:
-            VarStash.warnings.append("Compound id: [{id}] did not generate any modes")
+            VarStash.warnings.append("Compound id: [{id}] did not generate any modes") # probably never going to happen
 
         df.set_index(itertools.repeat(id, len(df)), inplace=True)
         df['seed'] = [seed] * len(df)
@@ -185,6 +186,6 @@ class HTMLBuilder:
 
     def _build_warnings(self):
         if len(VarStash.warnings) > 0:
-            self.replacements['WARNINGS_TAG'] = '\n'.join(VarStash.warnings)
+            self.replacements['WARNINGS_TAG'] = '\n'.join([f"<p><code>{warning}</code></p>" for warning in VarStash.warnings])
         else:
-            self.replacements['WARNINGS_TAG'] = '<i>No warnings about </i>'
+            self.replacements['WARNINGS_TAG'] = '<p><i>No warnings about missing MOL2 files</i></p>'

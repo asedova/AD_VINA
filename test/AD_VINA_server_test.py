@@ -24,7 +24,7 @@ test_compound_set = "37778/4/3"
 
 
 
-defaults = {
+defaults_vina = {
     'exhaustiveness': '8',
     'num_modes': 9,
     'energy_range': 3
@@ -38,7 +38,7 @@ defaults_quick = {
 
 params_local = {
     'skip_dl': True,
-    #'skip_most_vina' : True,
+    'skip_most_vina' : True,
     }
 
 defaults_search_space = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
@@ -53,8 +53,8 @@ class AD_VINATest(unittest.TestCase):
             'workspace_id': self.wsId,
             'workspace_name': self.wsName,
             'search_space': defaults_search_space,
-            **defaults,
-            **params_local,
+            **defaults_vina,
+            #**params_local,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
 

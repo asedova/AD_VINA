@@ -67,7 +67,7 @@ class ProteinStructure(ChemKBaseObj):
 
         if get_file == 'load': 
             self._load()
-        if get_file == 'from_cache':
+        elif get_file == 'from_cache':
             self._from_cache()
         else: 
             raise NotImplementedError()
@@ -177,6 +177,8 @@ class CompoundSet(ChemKBaseObj):
         self._get_obj_data()
         self._to_data_frame()
 
+        self._check_warnings()
+
 
 
     def _fetch_mol2(self):
@@ -189,6 +191,8 @@ class CompoundSet(ChemKBaseObj):
 
         self.upa_old = self.upa
         self.upa = out_csu_fmffz['compoundset_ref']
+
+        
 
 
 
@@ -255,14 +259,14 @@ class CompoundSet(ChemKBaseObj):
     def _to_data_frame(self):
 
         objData_compound_l = self.objData['compounds']
-        attr_l = ['smiles', 'inchikey', 'name', 'charge', 'mass', 'mol2_source', 'deltag', 'formula', 'id'] # id is actually user-entered
+        attr_l = ['smiles', 'inchikey', 'name', 'mol2_handle_ref', 'charge', 'mass', 'mol2_source', 'deltag', 'formula', 'id'] # id is actually user-entered
 
         df = pd.DataFrame(columns=attr_l)
 
         ##
         ## objData
         for objData_compound in objData_compound_l:
-            df.loc[len(df)] = [objData_compound.get(key) for key in attr_l]
+            df.loc[len(df)] = [objData_compound.get(key) if objData_compound.get(key) != None else np.nan for key in attr_l]
 
         ##
         ## pdbqt filepath
@@ -290,8 +294,30 @@ class CompoundSet(ChemKBaseObj):
 
 
 
-    #def update_data_frame(self, col_name: str, col: list):
-    #    self.df[col_name] = col
+    def _check_warnings(self):
+        
+        ##
+        ## no mol2
+        for id, mol2_handle_ref in zip(self.get_attr_l('id'), self.get_attr_l('mol2_handle_ref')):
+            if isinstance(mol2_handle_ref, float) and np.isnan(mol2_handle_ref):
+                VarStash.warnings.append(
+                    f"Compound with user-entered id [{id}] has no MOL2 file. "
+                    "This is probably because it was not supplied by the user nor could not be found on ZINC."
+                    )
+        
+        ##
+        ## no pdbqt
+
+        id_no_pdbqt = [id for id in self.get_attr_l('id') if id not in self.id_to_pdbqt_filepath_d.keys()]
+
+        for id in id_no_pdbqt:
+            VarStash.warnings.append(
+                    f"Compound with user-entered id [{id}] does not have a PDBQT file. "
+                    "This could be because it did not have a MOL2 file to convert from, "
+                    "or because the MOL2 to PDBQT conversion failed."
+                    )
+
+
 
 
 

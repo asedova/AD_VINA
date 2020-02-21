@@ -12,10 +12,10 @@
 <body>
 
 
-<h1>Summary</h1>
-<h3>Compounds vs. protein <b>PROTEIN_TAG</b></h3>
+<h1>AutoDock Vina Results</h1>
+<h4>Compounds vs. protein <b>PROTEIN_TAG</b></h4>
 <p><i>Columns drag and drop</i></p>
-<table id="summary" class="display" width="100%"></table>
+<table id="table" class="display" width="100%"></table>
 
 
 <h1>Warnings</h1>
@@ -38,7 +38,7 @@ var columnset =
 COLUMNS_TAG
 ;
 $(document).ready(function() {
-    $('#summary').DataTable( {
+    $('#table').DataTable( {
         data: dataset,
         columns: columnset,
         colReorder: true

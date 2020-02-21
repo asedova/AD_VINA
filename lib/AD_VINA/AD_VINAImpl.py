@@ -135,23 +135,6 @@ class AD_VINA:
                 )
 
 
-        """
-        ##
-        ## must specify center to specify any of size
-
-        key_size_l = ['size_' + ch for ch in list('xyz')]
-        size_xyz = [params_search_space[key] for key in key_size_l]
-
-        if not all(center_xyz) and any(size_xyz):
-            raise ValueError(   
-                "INPUT ERROR: "
-                "Must completely specify center (i.e., center_x, center_y, center_z) before specifying any of size (i.e., size_x, size_y, size_z). "
-                "(Also, if any of size is unspecified, it will default to 30 Angstroms.) "
-                "Please try again"
-                )
-        """
-
-
         ##
         ## if center specified, fill in default size
 
@@ -276,6 +259,8 @@ class AD_VINA:
 
             for param, arg in params_vina.items():
                 cmd += ' --' + param + ' ' + str(arg)
+
+            cmd_l.append(cmd)
 
             retcode, stdout, stderr = dprint(cmd, run='cli', subproc_run_kwargs={'cwd': run_dir})
             

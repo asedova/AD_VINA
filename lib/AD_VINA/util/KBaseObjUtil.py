@@ -314,7 +314,7 @@ class CompoundSet(ChemKBaseObj):
             if isinstance(mol2_handle_ref, float) and np.isnan(mol2_handle_ref):
                 VarStash.warnings.append(
                     f"Compound with user-entered id [{id}] has no MOL2 file. "
-                    "This is probably because it was not supplied by the user nor could not be found on ZINC."
+                    "This is probably because it was not supplied by the user nor could be found on ZINC."
                     )
         
         ##

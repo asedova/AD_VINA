@@ -317,21 +317,27 @@ class AD_VINA:
                 }
 
             return dir_shockInfo
+        ##
+        ## return files
 
-        # return files
+        dir_retFiles = os.path.join(self.shared_folder, 'pdbqt_log_dir')
+        os.mkdir(dir_retFiles)
 
-        dir_retFiles_path = os.path.join(self.shared_folder, 'pdbqt_log_dir')
-        os.mkdir(dir_retFiles_path)
+        #
 
+        full_table_filepath = os.path.join(dir_retFiles, 'full.csv')
+        VarStash.df_full.to_csv(full_table_filepath)
+
+        #
 
         for filename in out_pdbqt_filename_l + log_filename_l:
-            shutil.copyfile(os.path.join(run_dir, filename), os.path.join(dir_retFiles_path, filename))
+            shutil.copyfile(os.path.join(run_dir, filename), os.path.join(dir_retFiles, filename))
 
         # so DataFileUtil doesn't crash over zipping an empty folder
-        if len(os.listdir(dir_retFiles_path)) == 0:
-            dprint(rf"echo 'Sorry, no files were generated' > {os.path.join(dir_retFiles_path, 'README')}", run='cli')
+        if len(os.listdir(dir_retFiles)) == 0:
+            dprint(rf"touch {os.path.join(dir_retFiles, 'Sorry_no_files_were_generated')}", run='cli')
 
-        dir_retFiles_shockInfo = dir_to_shock(dir_retFiles_path, 'pdbqt_log.zip', 'Generated .pdbqt and log files')
+        dir_retFiles_shockInfo = dir_to_shock(dir_retFiles, 'pdbqt_log.zip', 'Generated .pdbqt and log files, as well as a full .csv')
 
 
 
@@ -348,7 +354,6 @@ class AD_VINA:
         ##
 
         report_params = {
-            'message': 'this is the report_params `message`',
             'warnings': VarStash.warnings,
             'direct_html_link_index': 0,
             'html_links': [html_shockInfo],

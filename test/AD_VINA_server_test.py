@@ -57,6 +57,24 @@ class AD_VINATest(unittest.TestCase):
             **params_local,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
+        dprint('ret', run=locals())
+
+    def _test_incomplete_center(self):
+        search_space = defaults_search_space.copy()
+        search_space['center_x'] = 0
+
+        params = {
+            "pdb_ref": _3dnf_clean_pdb,
+            'ligand_list_ref': test_compound_set,
+            'workspace_id': self.wsId,
+            'workspace_name': self.wsName,
+            'search_space': search_space,
+            **defaults_quick,
+            **params_local,
+            }
+        self.assertRaises(self.serviceImpl.ad_vina(self.ctx, params))
+        dprint('ret', run=locals())
+
 
     @classmethod
     def setUpClass(cls):

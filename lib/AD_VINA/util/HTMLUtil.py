@@ -127,6 +127,10 @@ class HTMLBuilder:
         dprint('df', run=locals())
 
 
+        ##
+        ## save full
+        VarStash.df_full = df.copy()
+
 
         ##
         ## filter/rename columns
@@ -143,7 +147,7 @@ class HTMLBuilder:
 
 
         ##
-        ## dump
+        ## dump to html
 
         self.replacements['JSON_TAG'] = df.to_json(orient='values').replace('null', '"-"')
         self.replacements['COLUMNS_TAG'] = json.dumps([{'title': column} for column in df.columns])

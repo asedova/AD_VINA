@@ -131,8 +131,8 @@ class HTMLBuilder:
         ##
         ## filter/rename columns
 
-        keep = ['id', 'name', 'formula', 'mass', 'charge', 'mode', 'affinity', 'rmsd_lb', 'rmsd_ub', 'smiles', 'modelseed_link']
-        rename = ['(User Entered) Compound Id', '(User Entered) Name', 'Formula', 'Mass (g/mol)', 'Charge (C)',
+        keep = ['id', 'name', 'formula', 'mass', 'mode', 'affinity', 'rmsd_lb', 'rmsd_ub', 'smiles', 'modelseed_link']
+        rename = ['(User Entered) Compound Id', '(User Entered) Name', 'Formula', 'Mass (g/mol)',
                     'Mode', 'Affinity (kcal/mol)', 'RMSD L.B.', 'RMSD U.B.', 'SMILES', 'ModelSEED']
         rename = {old: new for old, new in zip(keep, rename)}
 

@@ -32,7 +32,7 @@ defaults_vina = {
 
 defaults_quick = {
     'exhaustiveness': 2,
-    'num_modes': 3,
+    'num_modes': 2,
     'energy_range': 3
     }
 
@@ -53,8 +53,8 @@ class AD_VINATest(unittest.TestCase):
             'workspace_id': self.wsId,
             'workspace_name': self.wsName,
             'search_space': defaults_search_space,
-            **defaults_vina,
-            #**params_local,
+            **defaults_quick,
+            **params_local,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
 
@@ -86,7 +86,7 @@ class AD_VINATest(unittest.TestCase):
         cls.wsClient = workspaceService(cls.wsURL)
         cls.wsName = 'AD_VINA_' + str(uuid.uuid4())
         cls.wsId = cls.wsClient.create_workspace({'workspace': cls.wsName})[0]
-        dprint(cls.wsId, type(cls.wsId))
+        dprint('cls.wsId', run=locals())
         cls.serviceImpl = AD_VINA(cls.cfg)
         cls.scratch = cls.cfg['scratch']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
@@ -100,16 +100,9 @@ class AD_VINATest(unittest.TestCase):
         if hasattr(cls, 'wsName'):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
+        tag = '!!!!!!!!!!!!!!!!!!!!!!!!!!' * 40
+        dprint(tag + ' DO NOT FORGET TO GRAB HTML(S) ' + tag)
 
-    def _test_static_AD_VINA(self):
-        inparams = {
-            "receptor" : "lck_small.pdbqt",
-            "ligand" : "lck-active-26.pdbqt",
-            "center" :  "18.273, 44.681, 80.351",
-            "size" : "50, 50, 50",
-            "outname" : "out.pdbqt"
-        }
-        ret = self.getImpl().ad_vina(self.getContext(), inparams)[0]
 
     def _test_mol2_to_pdbqt(self):
 

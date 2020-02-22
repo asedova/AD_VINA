@@ -281,17 +281,29 @@ class CompoundSet(ChemKBaseObj):
         ## ModelSEED id
         inchikey_2_cpd_filepath = '/kb/module/data/Inchikey_IDs.json'
         with open(inchikey_2_cpd_filepath) as fp:
-            d = json.load(fp)
+            d_full = json.load(fp)
+            d_nocharge = {key[:-2]:value for key, value in d_full.items()}
+            d_nostereo = {key[:-13]:value for key, value in d_full.items()}
 
-        df['cpd'] = [d.get(inchikey) if d.get(inchikey) else np.nan for inchikey in df['inchikey']]
-        df['modelseed_link'] = [f'<a href="modelseed.org/biochem/compounds/{cpd_id}">{cpd_id}</a>' if not(isinstance(cpd_id, float) and np.isnan(cpd_id)) else np.nan for cpd_id in df['cpd']]
+        def _inchikey_2_cpd(inchikey):
+            cpd = np.nan
+            for cutoff, d in zip([len(inchikey), -2, -13], [d_full, d_nocharge, d_nostereo]):
+                try:
+                    cpd = d[inchikey[:cutoff]]
+                    break
+                except:
+                    continue
+            return cpd
+
+        df['cpd'] = [_inchikey_2_cpd(inchikey) for inchikey in df['inchikey']]
+        df['modelseed_link'] = [f'<a href="https://modelseed.org/biochem/compounds/{cpd_id}", target="_blank">{cpd_id}</a>' if not(isinstance(cpd_id, float) and np.isnan(cpd_id)) else np.nan for cpd_id in df['cpd']]
 
 
         dprint('df', run=locals())
 
         self.df = df
 
-
+    
 
 
     def _check_warnings(self):

@@ -34,7 +34,7 @@ class AD_VINA:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/n1mus/AD_VINA"
-    GIT_COMMIT_HASH = "c513e24f86458708db620ccf91492623e1aa2b8a"
+    GIT_COMMIT_HASH = "7c7740cd7d0b5516ad02880b1440b7e97cb59349"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -381,27 +381,6 @@ class AD_VINA:
         # return the results
         return [output]
 
-    def mol2_to_pdbqt(self, ctx, mol2_file_path, compound_id):
-        """
-        :param mol2_file_path: instance of String
-        :param compound_id: instance of String
-        :returns: instance of String
-        """
-        # ctx is the context object
-        # return variables are: pdbqt_file_path
-        #BEGIN mol2_to_pdbqt
-
-        cs = CompoundSet('', get_file='do_nothing')
-
-        pdbqt_file_path = cs.mol2_to_pdbqt(mol2_file_path, self.shared_folder, compound_id)
-        #END mol2_to_pdbqt
-
-        # At some point might do deeper type checking...
-        if not isinstance(pdbqt_file_path, str):
-            raise ValueError('Method mol2_to_pdbqt return value ' +
-                             'pdbqt_file_path is not type str as required.')
-        # return the results
-        return [pdbqt_file_path]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK",

@@ -395,37 +395,3 @@ class CompoundSet(ChemKBaseObj):
 
 
 
-####################################################################################################
-####################################################################################################
-####################################################################################################
-####################################################################################################
-####################################################################################################
-####################################################################################################
-
-    def mol2_to_pdbqt(self, mol2_file_path, shared_folder, compound_id):
-
-        logging.info('start converting mol2 to pdbqt')
-
-        pdbqt_temp_dir = "{}/{}".format(shared_folder, uuid.uuid4())
-        os.mkdir(pdbqt_temp_dir)
-
-        pdbqt_file_path = os.path.join(pdbqt_temp_dir, compound_id + '.pdbqt')
-
-        prepare_ligand4_filepath = os.path.join(self.AUTODOCK_UTIL_DIR, 'prepare_ligand4.py')
-
-        command = ['python2.5', prepare_ligand4_filepath, '-l', mol2_file_path, '-o', pdbqt_file_path]
-
-        process = Popen(command, stdout=PIPE, stderr=PIPE)
-        stdout, stderr = process.communicate()
-
-        logging.info('completed prepare_ligand4\nstdout:{}\nstderr:{}\n'.format(stdout, stderr))
-
-        if not os.path.exists(pdbqt_file_path):
-            pdbqt_file_path = ''
-            logging.warning('failed to convert mol2 to pdbqt format')
-        else:
-            file_size = os.path.getsize(pdbqt_file_path)
-            if file_size == 0:
-                logging.warning('generated empty pdbqt file')
-
-        return pdbqt_file_path

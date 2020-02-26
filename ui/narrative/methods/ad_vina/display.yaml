@@ -66,21 +66,21 @@ parameters :
             Z-coordinate of the center of a subportion of the protein to be analyzed (default is full center - only valid for single protein runs)
     size_x :
         ui-name : |
-            Size x coordinate
+            Size in x dimension (Angstroms)
         short-hint : |
             X-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
         long-hint  : |
             X-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
     size_y :
         ui-name : |
-            Size y coordinate
+            Size in y dimension (Angstroms)
         short-hint : |
             Y-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
         long-hint  : |
             Y-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
     size_z :
         ui-name : |
-            Size z coordinate
+            Size in z dimension (Angstroms)
         short-hint : |
             Z-dimension size of a subportion of the protein to be analyzed (default is full size - only valid for single protein runs)
         long-hint  : |

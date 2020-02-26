@@ -20,59 +20,47 @@ from AD_VINA.util.PrintUtil import *
 
 
 _3dnf_clean_pdb = "37778/2/1"
-test_compound_set = "37778/4/3"
+test_compound_set = "38376/3/29"
 
 
 
-defaults_vina = {
+params_input = {
+    'pdb_ref': _3dnf_clean_pdb,
+    'ligand_list_ref': test_compound_set,
+    }
+
+
+params_misc_vinaDefault = {
     'exhaustiveness': '8',
     'num_modes': 9,
     'energy_range': 3
     }
 
-defaults_quick = {
+params_misc_quick = {
     'exhaustiveness': 2,
     'num_modes': 2,
     'energy_range': 3
     }
 
 params_local = {
-    'skip_dl': True,
-    'skip_most_vina' : True,
+    #'skip_dl': True,
+    #'skip_most_vina' : True,
     }
 
-defaults_search_space = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
+params_search_space_default = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
 
 
 class AD_VINATest(unittest.TestCase):
 
     def test(self):
         params = {
-            "pdb_ref": _3dnf_clean_pdb,
-            'ligand_list_ref': test_compound_set,
-            'workspace_id': self.wsId,
-            'workspace_name': self.wsName,
-            'search_space': defaults_search_space,
-            **defaults_quick,
+            **params_input,
+            'search_space': params_search_space_default,
+            **params_misc_quick,
             **params_local,
+            **self.params_ws,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
-        dprint('ret', run=locals())
-
-    def _test_incomplete_center(self):
-        search_space = defaults_search_space.copy()
-        search_space['center_x'] = 0
-
-        params = {
-            "pdb_ref": _3dnf_clean_pdb,
-            'ligand_list_ref': test_compound_set,
-            'workspace_id': self.wsId,
-            'workspace_name': self.wsName,
-            'search_space': search_space,
-            **defaults_quick,
-            **params_local,
-            }
-        self.assertRaises(self.serviceImpl.ad_vina(self.ctx, params))
         dprint('ret', run=locals())
 
 
@@ -104,6 +92,10 @@ class AD_VINATest(unittest.TestCase):
         cls.wsClient = workspaceService(cls.wsURL)
         cls.wsName = 'AD_VINA_' + str(uuid.uuid4())
         cls.wsId = cls.wsClient.create_workspace({'workspace': cls.wsName})[0]
+        cls.params_ws = {
+            'workspace_id': cls.wsId,
+            'workspace_name': cls.wsName,
+            }
         dprint('cls.wsId', run=locals())
         cls.serviceImpl = AD_VINA(cls.cfg)
         cls.scratch = cls.cfg['scratch']
@@ -120,5 +112,21 @@ class AD_VINATest(unittest.TestCase):
             print('Test workspace was deleted')
         tag = '!!!!!!!!!!!!!!!!!!!!!!!!!!' * 40
         dprint(tag + ' DO NOT FORGET TO GRAB HTML(S) ' + tag)
+
+
+
+########################### quick tests ############################################################
+
+    def test_incomplete_center(self):
+        params_search_space = params_search_space_default.copy()
+        params_search_space['center_x'] = 0
+        params = {
+            **params_input,
+            'search_space': params_search_space,
+            **params_misc_quick,
+            **params_local,
+            **self.params_ws
+            }
+        self.assertRaises(ValueError, self.serviceImpl.ad_vina, self.ctx, params)
 
 

@@ -125,12 +125,12 @@ class AD_VINA:
         ## if center specified, must be completely specified
 
         key_center_l = ['center_' + ch for ch in list('xyz')]
-        center_xyz = [params_search_space[key] for key in key_center_l]
+        center_xyz_specified = [params_search_space[key] != None for key in key_center_l]
 
-        if any(center_xyz) and not all(center_xyz):
+        if any(center_xyz_specified) and not all(center_xyz_specified):
             raise ValueError(
                 'INPUT ERROR: '
-                'If any of center (i.e., center_x, center_y, center_z) is specified, all of center must be specified. '
+                'If any of center (i.e., center_x, center_y, center_z) are specified, all of center must be specified. '
                 'Please try again'
                 )
 
@@ -141,12 +141,17 @@ class AD_VINA:
         size_default = 30 # Angstroms
 
         key_size_l = ['size_' + ch for ch in list('xyz')]
-        size_xyz = [params_search_space[key] for key in key_size_l]
+        size_xyz_specified = [params_search_space[key] != None for key in key_size_l]
 
-        if all(center_xyz) and not all(size_xyz):
+        if all(center_xyz_specified) and not all(size_xyz_specified):
             for key_size in key_size_l:
                 if not params_search_space.get(key_size):
                     params_search_space[key_size] = size_default
+                    VarStash.warnings.append(
+                            'center_x, center_y, and center_z were specified, '
+                            f'but {key_size} was not, and will default to 30 &#8491; '
+                            'instead of the bounds of the protein'
+                            )
 
 
 
@@ -211,6 +216,18 @@ class AD_VINA:
         for id, pdbqt_filepath in zip(cs.get_attr_l('id'), cs.get_attr_l('pdbqt_filepath')):
 
             if params.get('skip_vina'):
+                run_dir = '/kb/module/test/data/vina'
+                id_l = ['cpd00016', 'cpd00094', 'cpd00226', 'cpd00348', 'cpd00939', 'cpd08316']
+                log_filename_l = [
+                    'compoundID[cpd00016]_vs_protein[3dnf_clean].log', 'compoundID[cpd00094]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00226]_vs_protein[3dnf_clean].log', 'compoundID[cpd00348]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00939]_vs_protein[3dnf_clean].log', 'compoundID[cpd08316]_vs_protein[3dnf_clean].log'
+                    ]
+                out_pdbqt_filename_l = [
+                    'compoundID[cpd00016]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd00094]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00226]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd00348]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00939]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd08316]_vs_protein[3dnf_clean].pdbqt'
+                    ]
                 break
 
             if isinstance(pdbqt_filepath, float) and np.isnan(pdbqt_filepath): # no mol2 -> no pdbqt -> skip

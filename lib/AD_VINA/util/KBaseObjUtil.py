@@ -8,6 +8,7 @@ import logging
 import zipfile
 import shutil
 import json
+import re
 from subprocess import Popen, PIPE
 
 from .PrintUtil import *
@@ -256,6 +257,7 @@ class CompoundSet(ChemKBaseObj):
 
 
 
+
     def _to_data_frame(self):
 
         objData_compound_l = self.objData['compounds']
@@ -264,12 +266,24 @@ class CompoundSet(ChemKBaseObj):
         df = pd.DataFrame(columns=attr_l)
 
         ##
-        ## objData
+        ## populate with objData
         for objData_compound in objData_compound_l:
             df.loc[len(df)] = [objData_compound.get(key) if objData_compound.get(key) != None else np.nan for key in attr_l]
 
         ##
-        ## pdbqt filepath
+        ## dup id
+        id_l = df['id'].tolist()
+        if len(id_l) > len(set(id_l)):
+            raise Exception(
+                'INPUT ERROR: '
+                'Duplicate id values found in CompoundSet. '
+                'Please enter unique, user-friendly, and identifying id for each compound'
+                )
+
+
+        ##
+        ## fill in pdbqt filepath
+
         id_l = list(self.id_to_pdbqt_filepath_d.keys())
         pdbqt_filepath_l = list(self.id_to_pdbqt_filepath_d.values())
 
@@ -278,7 +292,8 @@ class CompoundSet(ChemKBaseObj):
 
 
         ##
-        ## ModelSEED id
+        ## fill in ModelSEED id
+
         inchikey_2_cpd_filepath = '/kb/module/data/Inchikey_IDs.json'
         with open(inchikey_2_cpd_filepath) as fp:
             d_full = json.load(fp)
@@ -290,6 +305,10 @@ class CompoundSet(ChemKBaseObj):
             for cutoff, d in zip([len(inchikey), -2, -13], [d_full, d_nocharge, d_nostereo]):
                 try:
                     cpd = d[inchikey[:cutoff]]
+                    if cutoff < 0:
+                        VarStash.warnings.append(
+                            f'Used partial inchikey {inchikey[:cutoff]} instead of full inchikey {inchikey} to get ModelSEED ID {cpd}'
+                            )
                     break
                 except:
                     continue
@@ -361,18 +380,19 @@ class CompoundSet(ChemKBaseObj):
 
         # find multiple models
 
-        for filepath in self.get_attr_l('pdbqt_filepath', rm_nan=True):
-            with open(filepath) as f:
-                for line in f:
-                    if line.strip() == '':
-                        continue
-                    elif line.startswith('MODEL'):
-                        if line.strip().endswith('1'):
-                            pdbqt_multiple_model_filepath_l.append(filepath)
-                            break
-                        else:
-                            raise Exception("Unknown pdbqt format")
-                    else:
+        for id, filepath in zip(self.get_attr_l('id'), self.get_attr_l('pdbqt_filepath')):
+            if isinstance(filepath, float) and np.isnan(filepath):
+                continue
+            with open(filepath) as fp:
+                for line in fp:
+                    if line.startswith('MODEL'):
+                        pdbqt_multiple_model_filepath_l.append(filepath)
+                        VarStash.warnings.append(
+                            f'Multiple models found in {filepath} for compound with id {id}. '
+                            'This could be because the MOL2 file that was user-supplied or fetched from ZINC '
+                            'had multiple models. '
+                            'Will use <code>vina split</code> and keep first model, for now'
+                            ) 
                         break
 
         # for each

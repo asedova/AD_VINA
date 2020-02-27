@@ -389,8 +389,7 @@ class CompoundSet(ChemKBaseObj):
                         pdbqt_multiple_model_filepath_l.append(filepath)
                         VarStash.warnings.append(
                             f'Multiple models found in {filepath} for compound with id {id}. '
-                            'This could be because the MOL2 file that was user-supplied or fetched from ZINC '
-                            'had multiple models. '
+                            '(This is often the case with structures determined by NMR.) '
                             'Will use <code>vina split</code> and keep first model, for now'
                             ) 
                         break

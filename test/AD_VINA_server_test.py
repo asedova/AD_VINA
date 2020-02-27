@@ -15,12 +15,16 @@ from AD_VINA.AD_VINAImpl import AD_VINA
 from AD_VINA.AD_VINAServer import MethodContext
 from AD_VINA.authclient import KBaseAuth as _KBaseAuth
 
-from AD_VINA.util.PrintUtil import *
+from AD_VINA.util.print import *
 
 
 
-_3dnf_clean_pdb = "37778/2/1"
-test_compound_set = "38376/3/29"
+_3dnf_clean_pdb = "38305/2/1"
+test_compound_set = "38305/4/6"
+test_compounds_1cpd_noMOL2 = "38305/9/1"
+test_compounds_1cpd_wMOL2_lineWJustTabs = "38305/7/1"
+test_compounds_justHeader = "38305/8/1"
+
 
 
 
@@ -42,9 +46,10 @@ params_misc_quick = {
     'energy_range': 3
     }
 
-params_local = {
+params_shortcut = {
     #'skip_dl': True,
     #'skip_most_vina' : True,
+    #'skip_save': True,
     }
 
 params_search_space_default = {space_type + '_' + ch: None for space_type in ['center', 'size'] for ch in list('xyz')}
@@ -52,16 +57,15 @@ params_search_space_default = {space_type + '_' + ch: None for space_type in ['c
 
 class AD_VINATest(unittest.TestCase):
 
-    def test(self):
+    def _test(self):
         params = {
             **params_input,
             'search_space': params_search_space_default,
             **params_misc_quick,
-            **params_local,
             **self.params_ws,
+            **params_shortcut,
             }
         ret = self.serviceImpl.ad_vina(self.ctx, params)
-        dprint('ret', run=locals())
 
 
     @classmethod
@@ -111,22 +115,86 @@ class AD_VINATest(unittest.TestCase):
             cls.wsClient.delete_workspace({'workspace': cls.wsName})
             print('Test workspace was deleted')
         tag = '!!!!!!!!!!!!!!!!!!!!!!!!!!' * 40
-        dprint(tag + ' DO NOT FORGET TO GRAB HTML(S) ' + tag)
+        dprint(
+            tag + 
+            ' DO NOT FORGET TO GRAB HTML(S) ' + 
+            tag +
+            ' DO NOT FORGET TO GRAB RETURN FILES ' +
+            tag
+            )
 
 
 
-########################### quick tests ############################################################
+########################### input tests ############################################################
 
-    def test_incomplete_center(self):
+    def _test_incomplete_center(self):
         params_search_space = params_search_space_default.copy()
         params_search_space['center_x'] = 0
         params = {
             **params_input,
             'search_space': params_search_space,
             **params_misc_quick,
-            **params_local,
+            **params_shortcut,
             **self.params_ws
             }
-        self.assertRaises(ValueError, self.serviceImpl.ad_vina, self.ctx, params)
+        with self.assertRaises(Exception) as cm:
+            self.serviceImpl.ad_vina(self.ctx, params)
+            self.assertEquals(
+                str(cm.exception),
+                'INPUT ERROR: '
+                'If any of center (i.e., center_x, center_y, center_z) are specified, '
+                'all of center must be specified. '
+                'Please try again'
+                )
+
+
+    def _test_empty_compound_set(self):
+        params_input_ = params_input.copy()
+        params_input_['ligand_list_ref'] = '38305/8/1'
+        params = {
+            **params_input_,
+            'search_space': params_search_space_default,
+            **params_misc_quick,
+            **params_shortcut,
+            **self.params_ws
+            }
+        with self.assertRaises(Exception) as cm:
+            self.serviceImpl.ad_vina(self.ctx, params)
+            self.assertEquals(
+                str(cm.exception),
+                'INPUT ERROR: '
+                'Please input a CompoundSet object that has greater than 0 compounds in it'
+                )
+            
+
+    def _test_cs_1cpd_noMOL2(self):
+        params_input_ = params_input.copy()
+        params_input_['ligand_list_ref'] = '38305/9/1'
+        params = {
+            **params_input_,
+            'search_space': params_search_space_default,
+            **params_misc_quick,
+            **self.params_ws
+            }
+        with self.assertRaises(Exception) as cm:
+            self.serviceImpl.ad_vina(self.ctx, params)
+            self.assertEquals(
+                str(cm.exception),
+                f"Sorry, none of the compounds in the input CompoundSet with name test_compounds_1cpd_noMOL2 "
+                "had associated MOL2 files, whether user-entered or looked up on ZINC. "
+                "There are no ligand files to run AutoDock Vina on"
+                )
+
+
+    def test_cs_1cpd_wMOL2(self):
+        params_input_ = params_input.copy()
+        params_input_['ligand_list_ref'] = '38491/7/1'
+        params = {
+            **params_input_,
+            'search_space': params_search_space_default,
+            **params_misc_quick,
+            **self.params_ws
+            }
+        ret = self.serviceImpl.ad_vina(self.ctx, params)
 
 

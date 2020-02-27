@@ -4,8 +4,8 @@ import fileinput
 import itertools
 
 
-from .PrintUtil import *
-from .KBaseObjUtil import *
+from .print import *
+from .kbase_obj import *
 
 
 
@@ -31,7 +31,10 @@ class HTMLBuilder:
 
         # html dir and file
 
-        self.html_dir = os.path.join(VarStash.shared_folder, 'html_dir' + VarStash.suffix)
+        self.html_dir = os.path.join(
+            VarStash.shared_folder, 
+            'html_dir__CompoundSet[' + cs.name + ']_vs_ProteinStructure[' + ps.name + ']_'  + VarStash.suffix
+            )
         os.mkdir(self.html_dir)
         self.html_filepath = os.path.join(self.html_dir, os.path.basename(self.html_template_filepath))
         

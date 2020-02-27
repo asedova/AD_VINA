@@ -11,10 +11,10 @@ subprocess.run = functools.partial(subprocess.run, stdout=subprocess.PIPE, stder
 
 #TODO decouple dprint and drun?
 #TODO time
-def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
-    print = functools.partial(globals()['print'], **kwargs)
+def dprint(*args, run=False, subproc_run_kwargs={}, print_kwargs={}):
+    print = functools.partial(globals()['print'], **print_kwargs)
 
-    def try_json_print(arg):
+    def print_format(arg):
         if isinstance(arg, (dict, list)):
             try:
                 arg_json = json.dumps(arg, indent=3, default=str)
@@ -22,8 +22,8 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
                     arg_json = '\n'.join(arg_json.split('\n')[0:MAX_LINES] + ['...'])
                 print(arg_json)
             except:
-                print('(did not successfully dump as json)')
-                print(arg, end=' ')
+                print('(dprint error: did not successfully dump as json)')
+                print(arg)
         else:
             print(arg, end=' ')
 
@@ -36,14 +36,14 @@ def dprint(*args, run=False, subproc_run_kwargs={}, **kwargs):
                 retcode = completed_proc.returncode
                 stdout = completed_proc.stdout.decode('utf-8')
                 stderr = completed_proc.stderr.decode('utf-8')
-                try_json_print(stdout)
-                try_json_print(stderr)
+                print_format(stdout)
+                print_format(stderr)
             elif isinstance(run, dict):
-                try_json_print(eval(arg, run))
+                print_format(eval(arg, run))
             else:
                 assert False
         else:
-            try_json_print(arg)
+            print_format(arg)
         print()
     print('--------------------------------------------------------------')
     # return last run

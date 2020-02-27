@@ -11,7 +11,7 @@ import json
 import re
 from subprocess import Popen, PIPE
 
-from .PrintUtil import *
+from .print import *
 
 
 ####################################################################################################
@@ -193,8 +193,17 @@ class CompoundSet(ChemKBaseObj):
         self.upa_old = self.upa
         self.upa = out_csu_fmffz['compoundset_ref']
 
-        
-
+        ##
+        ## check if no MOL2 files
+        objData = VarStash.dfu.get_objects({
+            'object_refs': [self.upa]
+            })['data'][0]['data']
+        if not any([compound_objData.get('mol2_handle_ref') for compound_objData in objData['compounds']]):
+            raise Exception(
+                f"Sorry, none of the compounds in the input CompoundSet with name {objData['name']} "
+                "had associated MOL2 files, whether user-entered or looked up on ZINC. "
+                "There are no ligand files to run AutoDock Vina on"
+                )
 
 
     def _convert_to_pdbqt(self):
@@ -226,9 +235,16 @@ class CompoundSet(ChemKBaseObj):
                 with source, target:
                     shutil.copyfileobj(source, target)
 
-
         self.id_to_pdbqt_filepath_d = {id: os.path.join(self.pdbqt_dir, filename) 
                 for id, filename in out_csu_ccmt2p['comp_id_pdbqt_file_name_map'].items()}
+
+        if len(self.id_to_pdbqt_filepath_d) == 0:
+            raise Exception(
+                f"Sorry, none of the compounds in the input CompoundSet with name {objData['name']} "
+                "had associated PDBQT files. "
+                "This is probably because all MOL2 files failed to convert to PDBQT. "
+                "There are no ligand files to run AutoDock Vina on"
+                )
 
 
 
@@ -255,13 +271,23 @@ class CompoundSet(ChemKBaseObj):
             'object_refs': [self.upa]
             })['data'][0]['data']
 
+        if len(self.objData['compounds']) == 0:
+            raise Exception(
+                'INPUT ERROR: '
+                'Please input a CompoundSet object that has greater than 0 compounds in it'
+                )
+
+        self.name = self.objData['name']
+        if self.name[:-4] in ['.tsv', '.sdf']:
+            self.name = self.name[:-4]
 
 
 
     def _to_data_frame(self):
 
         objData_compound_l = self.objData['compounds']
-        attr_l = ['smiles', 'inchikey', 'name', 'mol2_handle_ref', 'charge', 'mass', 'mol2_source', 'deltag', 'formula', 'id'] # id is actually user-entered
+        attr_l = ['smiles', 'inchikey', 'name', 'mol2_handle_ref', 'charge', 'mass', 
+            'mol2_source', 'deltag', 'formula', 'id'] # id is actually user-entered
 
         df = pd.DataFrame(columns=attr_l)
 
@@ -307,7 +333,8 @@ class CompoundSet(ChemKBaseObj):
                     cpd = d[inchikey[:cutoff]]
                     if cutoff < 0:
                         VarStash.warnings.append(
-                            f'Used partial inchikey {inchikey[:cutoff]} instead of full inchikey {inchikey} to get ModelSEED ID {cpd}'
+                            f'Used partial inchikey {inchikey[:cutoff]} instead of full inchikey {inchikey} '
+                            f'to get ModelSEED ID {cpd}'
                             )
                     break
                 except:
@@ -315,7 +342,10 @@ class CompoundSet(ChemKBaseObj):
             return cpd
 
         df['cpd'] = [_inchikey_2_cpd(inchikey) for inchikey in df['inchikey']]
-        df['modelseed_link'] = [f'<a href="https://modelseed.org/biochem/compounds/{cpd_id}", target="_blank">{cpd_id}</a>' if not(isinstance(cpd_id, float) and np.isnan(cpd_id)) else np.nan for cpd_id in df['cpd']]
+        df['modelseed_link'] = [
+            f'<a href="https://modelseed.org/biochem/compounds/{cpd_id}", target="_blank">{cpd_id}</a>' 
+            if not(isinstance(cpd_id, float) and np.isnan(cpd_id)) else np.nan for cpd_id in df['cpd']
+            ]
 
 
         dprint('df', run=locals())
@@ -343,10 +373,10 @@ class CompoundSet(ChemKBaseObj):
 
         for id in id_no_pdbqt:
             VarStash.warnings.append(
-                    f"Compound with user-entered id [{id}] does not have a PDBQT file. "
-                    "This could be because it did not have a MOL2 file to convert from, "
-                    "or because the MOL2 to PDBQT conversion failed."
-                    )
+                f"Compound with user-entered id [{id}] does not have a PDBQT file. "
+                "This could be because it did not have a MOL2 file to convert from, "
+                "or because the MOL2 to PDBQT conversion failed."
+                )
 
 
 
@@ -358,7 +388,7 @@ class CompoundSet(ChemKBaseObj):
         convenient and preserves order
         '''
         if attr not in self.df.columns and attr != self.df.index.name:
-            raise ValueError('CompoundSet.get_attr_l: attr not in column or index names')
+            raise Exception('CompoundSet.get_attr_l: attr not in column or index names')
 
         if attr in self.df.columns:
             l = self.df[attr].tolist()

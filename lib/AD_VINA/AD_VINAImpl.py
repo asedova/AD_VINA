@@ -9,9 +9,9 @@ from installed_clients.ProteinStructureUtilsClient import ProteinStructureUtils
 from installed_clients.CompoundSetUtilsClient import CompoundSetUtils
 from installed_clients.DataFileUtilClient import DataFileUtil
 
-from .util.KBaseObjUtil import *
-from .util.PrintUtil import *
-from .util.HTMLUtil import *
+from .util.kbase_obj import *
+from .util.print import *
+from .util.html import *
 
 
 #END_HEADER
@@ -128,9 +128,10 @@ class AD_VINA:
         center_xyz_specified = [params_search_space[key] != None for key in key_center_l]
 
         if any(center_xyz_specified) and not all(center_xyz_specified):
-            raise ValueError(
+            raise Exception(
                 'INPUT ERROR: '
-                'If any of center (i.e., center_x, center_y, center_z) are specified, all of center must be specified. '
+                'If any of center (i.e., center_x, center_y, center_z) are specified, '
+                'all of center must be specified. '
                 'Please try again'
                 )
 
@@ -219,14 +220,20 @@ class AD_VINA:
                 run_dir = '/kb/module/test/data/vina'
                 id_l = ['cpd00016', 'cpd00094', 'cpd00226', 'cpd00348', 'cpd00939', 'cpd08316']
                 log_filename_l = [
-                    'compoundID[cpd00016]_vs_protein[3dnf_clean].log', 'compoundID[cpd00094]_vs_protein[3dnf_clean].log', 
-                    'compoundID[cpd00226]_vs_protein[3dnf_clean].log', 'compoundID[cpd00348]_vs_protein[3dnf_clean].log', 
-                    'compoundID[cpd00939]_vs_protein[3dnf_clean].log', 'compoundID[cpd08316]_vs_protein[3dnf_clean].log'
+                    'compoundID[cpd00016]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00094]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00226]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00348]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd00939]_vs_protein[3dnf_clean].log', 
+                    'compoundID[cpd08316]_vs_protein[3dnf_clean].log'
                     ]
                 out_pdbqt_filename_l = [
-                    'compoundID[cpd00016]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd00094]_vs_protein[3dnf_clean].pdbqt', 
-                    'compoundID[cpd00226]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd00348]_vs_protein[3dnf_clean].pdbqt', 
-                    'compoundID[cpd00939]_vs_protein[3dnf_clean].pdbqt', 'compoundID[cpd08316]_vs_protein[3dnf_clean].pdbqt'
+                    'compoundID[cpd00016]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00094]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00226]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00348]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd00939]_vs_protein[3dnf_clean].pdbqt', 
+                    'compoundID[cpd08316]_vs_protein[3dnf_clean].pdbqt'
                     ]
                 break
 
@@ -309,7 +316,7 @@ class AD_VINA:
 
         ##
         ####
-        ###### return directories
+        ###### return files
         ####
         ##
 
@@ -337,7 +344,10 @@ class AD_VINA:
         ##
         ## return files
 
-        dir_retFiles = os.path.join(self.shared_folder, 'pdbqt_log_dir')
+        dir_retFiles = os.path.join(
+            self.shared_folder,
+            'pdbqt_log_csv_dir__CompoundSet[' + cs.name + ']_vs_ProteinStructure[' + ps.name + ']_' + VarStash.suffix
+            )
         os.mkdir(dir_retFiles)
 
         #
@@ -350,17 +360,43 @@ class AD_VINA:
         for filename in out_pdbqt_filename_l + log_filename_l:
             shutil.copyfile(os.path.join(run_dir, filename), os.path.join(dir_retFiles, filename))
 
+
+
+
+        ##
+        ####
+        ###### save 
+        ####
+        ##
+
+
+
+        if params.get('skip_save'):
+            return None
+
+
+
         # so DataFileUtil doesn't crash over zipping an empty folder
+
         if len(os.listdir(dir_retFiles)) == 0:
             dprint(rf"touch {os.path.join(dir_retFiles, 'Sorry_no_files_were_generated')}", run='cli')
 
-        dir_retFiles_shockInfo = dir_to_shock(dir_retFiles, 'pdbqt_log.zip', 'Generated .pdbqt and log files, as well as a full .csv')
+        #
 
+        dir_retFiles_shockInfo = dir_to_shock(
+            dir_retFiles, 
+            'pdbqt_log.zip', 
+            'Generated .pdbqt and log files, as well as a full .csv'
+            )
 
 
         # html
 
-        html_shockInfo = dir_to_shock(hb.html_dir, 'index.html', 'HTML report for AutoDock Vina')
+        html_shockInfo = dir_to_shock(
+            hb.html_dir, 
+            'index.html', 
+            'HTML report for AutoDock Vina'
+            )
             
 
 
